@@ -44,6 +44,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: RootNotFound,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -73,5 +74,17 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  )
+}
+
+function RootNotFound() {
+  return (
+    <main className="mx-auto max-w-3xl px-6 py-16">
+      <h1 className="text-2xl font-semibold">页面不存在</h1>
+      <p className="mt-3 text-muted-foreground">你访问的地址无效，返回首页继续浏览。</p>
+      <a className="mt-6 inline-block underline" href="/">
+        返回首页
+      </a>
+    </main>
   )
 }
