@@ -52,7 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body
-				className="flex flex-col min-h-screen justify-between font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]"
+				className="flex min-h-screen flex-col justify-between font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(255,36,66,0.22)]"
 			>
 				<Header />
 				<main className="flex-1">{children}</main>

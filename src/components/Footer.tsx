@@ -2,7 +2,7 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="border-t border-zinc-200 px-4 pb-12 pt-8 text-zinc-500">
+		<footer className="border-t border-rose-100 bg-white/70 px-4 pb-12 pt-8 text-zinc-600 backdrop-blur">
 			<div className="mx-auto flex w-full max-w-[1160px] flex-col gap-4 text-center sm:flex-row sm:items-center sm:text-left">
 				<div className="w-full sm:w-2/3">
 					<p className="m-0 text-sm">
@@ -14,7 +14,7 @@ export default function Footer() {
 						href="https://github.com/seolhw/open-rednote"
 						target="_blank"
 						rel="noreferrer"
-						className="rounded-xl p-2 text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
+						className="rounded-xl p-2 text-zinc-600 transition hover:bg-rose-50 hover:text-rose-600"
 					>
 						<span className="sr-only">打开项目 GitHub</span>
 						<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
