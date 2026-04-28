@@ -43,7 +43,7 @@ export default function Header() {
 					>
 						GitHub
 					</a>
-					<details className="relative w-full sm:w-auto">
+					{/* <details className="relative w-full sm:w-auto">
 						<summary className="list-none cursor-pointer text-sm font-semibold text-zinc-500 transition hover:text-zinc-900">
 							功能入口
 						</summary>
@@ -69,7 +69,7 @@ export default function Header() {
 								</a>
 							))}
 						</div>
-					</details>
+					</details> */}
 				</div>
 			</nav>
 		</header>

@@ -2,10 +2,12 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="mt-16 border-t border-zinc-200 px-4 pb-12 pt-8 text-zinc-500">
+		<footer className="border-t border-zinc-200 px-4 pb-12 pt-8 text-zinc-500">
 			<div className="mx-auto flex w-full max-w-[1160px] flex-col gap-4 text-center sm:flex-row sm:items-center sm:text-left">
 				<div className="w-full sm:w-2/3">
-					<p className="m-0 text-sm">&copy; {year} 小红书 AI 自动运营平台. All rights reserved.</p>
+					<p className="m-0 text-sm">
+						&copy; {year} 小红书 AI 自动运营平台. All rights reserved.
+					</p>
 				</div>
 				<div className="flex w-full justify-center sm:w-1/3 sm:justify-end">
 					<a

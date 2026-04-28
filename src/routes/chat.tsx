@@ -17,13 +17,13 @@ import { useGuitarRecommendationChat } from "#/lib/demo-ai-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="flex-1 flex items-center justify-center px-4">
-			<div className="text-center max-w-3xl mx-auto w-full">
-				<h1 className="text-6xl font-bold mb-4 bg-linear-to-r from-orange-500 to-red-600 text-transparent bg-clip-text uppercase">
-					<span className="text-white">OpenClaw</span> IM
+		<div className="flex flex-1 items-center justify-center px-4">
+			<div className="mx-auto w-full max-w-3xl text-center">
+				<h1 className="mb-4 bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-5xl font-bold text-transparent sm:text-6xl">
+					小红书 AI 助手
 				</h1>
-				<p className="text-gray-400 mb-6 w-2/3 mx-auto text-lg">
-					现在由 OpenClaw 提供对话能力，你可以直接在这里进行 IM 式交流。
+				<p className="mx-auto mb-6 w-full max-w-2xl text-base text-zinc-600 sm:text-lg">
+					在这里直接进行对话式创作，快速完成选题拆解、内容润色和发布建议。
 				</p>
 				{children}
 			</div>
@@ -33,8 +33,8 @@ function InitialLayout({ children }: { children: React.ReactNode }) {
 
 function ChattingLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="sticky bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm border-t border-orange-500/10 z-10">
-			<div className="max-w-3xl mx-auto w-full px-4 py-3">{children}</div>
+		<div className="sticky bottom-0 left-0 right-0 z-10 border-t border-zinc-200 bg-white/90 backdrop-blur-sm">
+			<div className="mx-auto w-full max-w-3xl px-4 py-3">{children}</div>
 		</div>
 	);
 }
@@ -90,17 +90,17 @@ function Messages({
 							key={message.id}
 							className={`p-4 ${
 								message.role === "assistant"
-									? "bg-linear-to-r from-orange-500/5 to-red-600/5"
+									? "rounded-xl border border-rose-100 bg-rose-50/60"
 									: "bg-transparent"
 							}`}
 						>
 							<div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
 								{message.role === "assistant" ? (
-									<div className="w-8 h-8 rounded-lg bg-linear-to-r from-orange-500 to-red-600 mt-2 flex items-center justify-center text-sm font-medium text-white flex-shrink-0">
+									<div className="mt-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-sm font-medium text-white">
 										AI
 									</div>
 								) : (
-									<div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center text-sm font-medium text-white flex-shrink-0">
+									<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-sm font-medium text-white">
 										Y
 									</div>
 								)}
@@ -128,7 +128,7 @@ function Messages({
 												? onStopSpeak()
 												: onSpeak(textContent, message.id)
 										}
-										className="flex-shrink-0 p-2 text-gray-400 hover:text-orange-400 transition-colors"
+										className="flex-shrink-0 p-2 text-zinc-400 transition-colors hover:text-rose-500"
 										title={isPlaying ? "Stop speaking" : "Read aloud"}
 									>
 										{isPlaying ? (
@@ -173,7 +173,7 @@ function ChatPage() {
 	const Layout = messages.length ? ChattingLayout : InitialLayout;
 
 	return (
-		<div className="relative flex h-[calc(100vh-80px)] bg-gray-900">
+		<div className="relative flex h-[500px]">
 			<div className="flex-1 flex flex-col min-h-0">
 				<Messages
 					messages={messages}
@@ -189,7 +189,7 @@ function ChatPage() {
 								<button
 									type="button"
 									onClick={stop}
-									className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+									className="flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-600"
 								>
 									<Square className="w-4 h-4 fill-current" />
 									Stop
@@ -210,10 +210,10 @@ function ChatPage() {
 									type="button"
 									onClick={handleMicClick}
 									disabled={isLoading || isTranscribing}
-									className={`p-3 rounded-lg transition-colors ${
+									className={`rounded-lg border p-3 transition-colors ${
 										isRecording
-											? "bg-red-600 hover:bg-red-700 text-white"
-											: "bg-gray-800/50 text-gray-400 hover:text-orange-400 border border-orange-500/20"
+											? "border-rose-500 bg-rose-500 text-white hover:bg-rose-600"
+											: "border-zinc-200 bg-white text-zinc-500 hover:text-rose-500"
 									} disabled:opacity-50`}
 									title={isRecording ? "Stop recording" : "Start recording"}
 								>
@@ -231,7 +231,7 @@ function ChatPage() {
 										value={input}
 										onChange={(e) => setInput(e.target.value)}
 										placeholder="请输入你想问 OpenClaw 的内容..."
-										className="w-full rounded-lg border border-orange-500/20 bg-gray-800/50 pl-4 pr-12 py-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-transparent resize-none overflow-hidden shadow-lg"
+										className="w-full resize-none overflow-hidden rounded-lg border border-zinc-200 bg-white py-3 pl-4 pr-12 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
 										rows={1}
 										style={{ minHeight: "44px", maxHeight: "200px" }}
 										disabled={isLoading}
@@ -252,7 +252,7 @@ function ChatPage() {
 									<button
 										type="submit"
 										disabled={!input.trim() || isLoading}
-										className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-orange-500 hover:text-orange-400 disabled:text-gray-500 transition-colors focus:outline-none"
+										className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-rose-500 transition-colors hover:text-rose-600 disabled:text-zinc-400 focus:outline-none"
 									>
 										<Send className="w-4 h-4" />
 									</button>
