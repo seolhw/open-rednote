@@ -12,15 +12,15 @@ export default function Header() {
 						className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(30,90,72,0.08)] sm:px-4 sm:py-2"
 					>
 						<span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#56c6be,#7ed3bf)]" />
-						自媒体自动运营
+						小红书 AI 自动运营平台
 					</Link>
 				</h2>
 
-				<div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
+				{/* <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
 					<BetterAuthHeader />
 
 					<ThemeToggle />
-				</div>
+				</div> */}
 
 				<div className="order-3 flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:order-2 sm:w-auto sm:flex-nowrap sm:pb-0">
 					<Link
@@ -38,12 +38,12 @@ export default function Header() {
 						项目说明
 					</Link>
 					<a
-						href="https://www.xiaohongshu.com"
+						href="https://github.com/seolhw/open-rednote"
 						className="nav-link"
 						target="_blank"
 						rel="noreferrer"
 					>
-						官网
+						GitHub
 					</a>
 					<details className="relative w-full sm:w-auto">
 						<summary className="nav-link list-none cursor-pointer">
