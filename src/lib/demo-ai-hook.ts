@@ -17,16 +17,16 @@ export type ChatMessage = {
 
 export type ChatMessages = ChatMessage[]
 
-type OpenClawMessage = {
+type ZeroClawMessage = {
   role: 'user' | 'assistant' | 'system'
   content: string
 }
 
-const toOpenClawMessages = ({
+const toZeroClawMessages = ({
   messages,
 }: {
   messages: ChatMessages
-}): OpenClawMessage[] =>
+}): ZeroClawMessage[] =>
   messages
     .map((message) => {
       const textPart = message.parts.find((part) => part.type === 'text')
@@ -38,7 +38,7 @@ const toOpenClawMessages = ({
         content: textPart.content,
       }
     })
-    .filter((message): message is OpenClawMessage => message !== null)
+    .filter((message): message is ZeroClawMessage => message !== null)
 
 export const useGuitarRecommendationChat = () => {
   const [messages, setMessages] = useState<ChatMessages>([])
@@ -62,7 +62,7 @@ export const useGuitarRecommendationChat = () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: toOpenClawMessages({ messages: [...messages, userMessage] }),
+        messages: toZeroClawMessages({ messages: [...messages, userMessage] }),
       }),
       signal: controller.signal,
     })
@@ -75,7 +75,7 @@ export const useGuitarRecommendationChat = () => {
           id: crypto.randomUUID(),
           role: 'assistant',
           parts: [
-            { type: 'text', content: errorPayload.error || 'OpenClaw 请求失败' },
+            { type: 'text', content: errorPayload.error || 'ZeroClaw 请求失败' },
           ],
         },
       ])

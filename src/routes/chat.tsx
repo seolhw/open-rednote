@@ -230,7 +230,7 @@ function ChatPage() {
 									<textarea
 										value={input}
 										onChange={(e) => setInput(e.target.value)}
-										placeholder="请输入你想问 OpenClaw 的内容..."
+										placeholder="请输入你想问 ZeroClaw 的内容..."
 										className="w-full resize-none overflow-hidden rounded-lg border border-zinc-200 bg-white py-3 pl-4 pr-12 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
 										rows={1}
 										style={{ minHeight: "44px", maxHeight: "200px" }}
