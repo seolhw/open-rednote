@@ -58,6 +58,8 @@ Am example chat application built with TanStack Start, TanStack Store, and Claud
 
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key
+OPENCLAW_BASE_URL=your_openclaw_base_url
+OPENCLAW_TOKEN=your_openclaw_token
 ```
 
 ## ✨ Features
