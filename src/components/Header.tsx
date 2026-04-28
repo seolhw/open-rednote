@@ -13,18 +13,18 @@ export default function Header() {
             className="inline-flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm text-[var(--sea-ink)] no-underline shadow-[0_8px_24px_rgba(30,90,72,0.08)] sm:px-4 sm:py-2"
           >
             <span className="h-2 w-2 rounded-full bg-[linear-gradient(90deg,#56c6be,#7ed3bf)]" />
-            TanStack Start
+自媒体自动运营
           </Link>
         </h2>
 
         <div className="ml-auto flex items-center gap-1.5 sm:ml-0 sm:gap-2">
           <a
-            href="https://x.com/tan_stack"
+            href="https://www.xiaohongshu.com"
             target="_blank"
             rel="noreferrer"
             className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
           >
-            <span className="sr-only">Follow TanStack on X</span>
+            <span className="sr-only">打开小红书官网</span>
             <svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24">
               <path
                 fill="currentColor"
@@ -33,12 +33,10 @@ export default function Header() {
             </svg>
           </a>
           <a
-            href="https://github.com/TanStack"
-            target="_blank"
-            rel="noreferrer"
+            href="/demo/ai-chat"
             className="hidden rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)] sm:block"
           >
-            <span className="sr-only">Go to TanStack GitHub</span>
+            <span className="sr-only">进入 OpenClaw IM</span>
             <svg viewBox="0 0 16 16" aria-hidden="true" width="24" height="24">
               <path
                 fill="currentColor"
@@ -58,14 +56,14 @@ export default function Header() {
             className="nav-link"
             activeProps={{ className: 'nav-link is-active' }}
           >
-            Home
+工作台
           </Link>
           <Link
             to="/about"
             className="nav-link"
             activeProps={{ className: 'nav-link is-active' }}
           >
-            About
+项目说明
           </Link>
           <a
             href="https://tanstack.com/start/latest/docs/framework/react/overview"
@@ -73,11 +71,11 @@ export default function Header() {
             target="_blank"
             rel="noreferrer"
           >
-            Docs
+小红书官网
           </a>
           <details className="relative w-full sm:w-auto">
             <summary className="nav-link list-none cursor-pointer">
-              Demos
+功能入口
             </summary>
             <div className="mt-2 min-w-56 rounded-xl border border-[var(--line)] bg-[var(--header-bg)] p-2 shadow-lg sm:absolute sm:right-0">
               <a

@@ -5,18 +5,18 @@ export default function Footer() {
     <footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
       <div className="page-wrap flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
         <p className="m-0 text-sm">
-          &copy; {year} Your name here. All rights reserved.
+          &copy; {year} 自媒体自动运营. All rights reserved.
         </p>
-        <p className="island-kicker m-0">Built with TanStack Start</p>
+        <p className="island-kicker m-0">小红书 AI 自动运营平台</p>
       </div>
       <div className="mt-4 flex justify-center gap-4">
         <a
-          href="https://x.com/tan_stack"
+          href="https://www.xiaohongshu.com"
           target="_blank"
           rel="noreferrer"
           className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
         >
-          <span className="sr-only">Follow TanStack on X</span>
+          <span className="sr-only">打开小红书官网</span>
           <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
             <path
               fill="currentColor"
@@ -25,12 +25,12 @@ export default function Footer() {
           </svg>
         </a>
         <a
-          href="https://github.com/TanStack"
+          href="/demo/ai-chat"
           target="_blank"
           rel="noreferrer"
           className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
         >
-          <span className="sr-only">Go to TanStack GitHub</span>
+          <span className="sr-only">进入 OpenClaw IM</span>
           <svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
             <path
               fill="currentColor"
