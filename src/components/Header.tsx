@@ -50,7 +50,7 @@ export default function Header() {
 						<div className="mt-2 min-w-56 rounded-xl border border-zinc-200 bg-white p-2 shadow-lg sm:absolute sm:right-0">
 							{[
 								["/demo/prisma", "Prisma"],
-								["/demo/ai-chat", "Chat"],
+								["/chat", "Chat"],
 								["/demo/better-auth", "认证"],
 								["/demo/db-chat", "DB 聊天"],
 								["/demo/form/simple", "简单表单"],
