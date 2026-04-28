@@ -15,8 +15,6 @@ import { useTTS } from "#/hooks/demo-useTTS";
 import type { ChatMessages } from "#/lib/demo-ai-hook";
 import { useGuitarRecommendationChat } from "#/lib/demo-ai-hook";
 
-import "./ai-chat.css";
-
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="flex-1 flex items-center justify-center px-4">

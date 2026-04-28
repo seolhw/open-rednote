@@ -10,7 +10,6 @@ function useStreamConnection(
 	const loadedRef = useRef(false);
 
 	useEffect(() => {
-
 		const fetchData = async () => {
 			if (loadedRef.current) return;
 			loadedRef.current = true;
@@ -34,7 +33,7 @@ function useStreamConnection(
 			}
 		};
 		fetchData();
-	}, []);
+	});
 }
 
 export function useChat() {

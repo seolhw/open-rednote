@@ -7,6 +7,7 @@ export const env = createEnv({
 		OPENCLAW_BASE_URL: z.url().optional(),
 		OPENCLAW_TOKEN: z.string().min(1).optional(),
 		OPENCLAW_MODEL: z.string().min(1).optional(),
+		DATABASE_URL: z.string().min(1).optional(),
 	},
 
 	/**
