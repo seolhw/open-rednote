@@ -2,19 +2,17 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="mt-20 border-t border-[var(--line)] px-4 pb-14 pt-10 text-[var(--sea-ink-soft)]">
-			<div className="page-wrap flex flex-col gap-4 text-center sm:flex-row sm:items-center sm:text-left">
-				<div className="w-full sm:w-2/3 sm:text-left">
-					<p className="m-0 text-sm">
-						&copy; {year} 小红书 AI 自动运营平台. All rights reserved.
-					</p>
+		<footer className="mt-16 border-t border-zinc-200 px-4 pb-12 pt-8 text-zinc-500">
+			<div className="mx-auto flex w-full max-w-[1160px] flex-col gap-4 text-center sm:flex-row sm:items-center sm:text-left">
+				<div className="w-full sm:w-2/3">
+					<p className="m-0 text-sm">&copy; {year} 小红书 AI 自动运营平台. All rights reserved.</p>
 				</div>
-				<div className="w-full flex justify-end sm:w-1/3 sm:justify-end">
+				<div className="flex w-full justify-center sm:w-1/3 sm:justify-end">
 					<a
 						href="https://github.com/seolhw/open-rednote"
 						target="_blank"
 						rel="noreferrer"
-						className="rounded-xl p-2 text-[var(--sea-ink-soft)] transition hover:bg-[var(--link-bg-hover)] hover:text-[var(--sea-ink)]"
+						className="rounded-xl p-2 text-zinc-500 transition hover:bg-zinc-50 hover:text-zinc-900"
 					>
 						<span className="sr-only">打开项目 GitHub</span>
 						<svg viewBox="0 0 16 16" aria-hidden="true" width="32" height="32">
