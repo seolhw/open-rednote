@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as ChatIndexRouteImport } from './routes/chat/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -29,6 +30,7 @@ import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
 import { Route as ApiZeroclawChatRouteImport } from './routes/api/zeroclaw/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiUsersMeIndexRouteImport } from './routes/api/users/me/index'
 import { Route as ApiAgentsAgentIdIndexRouteImport } from './routes/api/agents/$agentId/index'
 import { Route as DemoApiAiTtsRouteImport } from './routes/demo/api.ai.tts'
 import { Route as DemoApiAiTranscriptionRouteImport } from './routes/demo/api.ai.transcription'
@@ -39,6 +41,11 @@ import { Route as ApiAgentsAgentIdGatewayRequestIndexRouteImport } from './route
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
@@ -136,6 +143,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersMeIndexRoute = ApiUsersMeIndexRouteImport.update({
+  id: '/api/users/me/',
+  path: '/api/users/me/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAgentsAgentIdIndexRoute = ApiAgentsAgentIdIndexRouteImport.update({
   id: '/api/agents/$agentId/',
   path: '/api/agents/$agentId/',
@@ -182,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -194,6 +207,7 @@ export interface FileRoutesByFullPath {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
+  '/api/users/me/': typeof ApiUsersMeIndexRoute
   '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesByTo {
@@ -210,6 +224,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/chat': typeof ChatIndexRoute
   '/docs': typeof DocsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -222,6 +237,7 @@ export interface FileRoutesByTo {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId': typeof ApiAgentsAgentIdIndexRoute
+  '/api/users/me': typeof ApiUsersMeIndexRoute
   '/api/agents/$agentId/gateway/request': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesById {
@@ -239,6 +255,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -251,6 +268,7 @@ export interface FileRoutesById {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
+  '/api/users/me/': typeof ApiUsersMeIndexRoute
   '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRouteTypes {
@@ -269,6 +287,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/chat/'
     | '/docs/'
+    | '/users/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -281,6 +300,7 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId/'
+    | '/api/users/me/'
     | '/api/agents/$agentId/gateway/request/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -297,6 +317,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/chat'
     | '/docs'
+    | '/users'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -309,6 +330,7 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId'
+    | '/api/users/me'
     | '/api/agents/$agentId/gateway/request'
   id:
     | '__root__'
@@ -325,6 +347,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/chat/'
     | '/docs/'
+    | '/users/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -337,6 +360,7 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId/'
+    | '/api/users/me/'
     | '/api/agents/$agentId/gateway/request/'
   fileRoutesById: FileRoutesById
 }
@@ -354,6 +378,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ChatIndexRoute: typeof ChatIndexRoute
   DocsIndexRoute: typeof DocsIndexRoute
+  UsersIndexRoute: typeof UsersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
@@ -366,6 +391,7 @@ export interface RootRouteChildren {
   DemoApiAiTranscriptionRoute: typeof DemoApiAiTranscriptionRoute
   DemoApiAiTtsRoute: typeof DemoApiAiTtsRoute
   ApiAgentsAgentIdIndexRoute: typeof ApiAgentsAgentIdIndexRoute
+  ApiUsersMeIndexRoute: typeof ApiUsersMeIndexRoute
   ApiAgentsAgentIdGatewayRequestIndexRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 
@@ -376,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/': {
+      id: '/users/'
+      path: '/users'
+      fullPath: '/users/'
+      preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/': {
@@ -511,6 +544,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/users/me/': {
+      id: '/api/users/me/'
+      path: '/api/users/me'
+      fullPath: '/api/users/me/'
+      preLoaderRoute: typeof ApiUsersMeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/agents/$agentId/': {
       id: '/api/agents/$agentId/'
       path: '/api/agents/$agentId'
@@ -570,6 +610,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ChatIndexRoute: ChatIndexRoute,
   DocsIndexRoute: DocsIndexRoute,
+  UsersIndexRoute: UsersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
@@ -582,6 +623,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoApiAiTranscriptionRoute: DemoApiAiTranscriptionRoute,
   DemoApiAiTtsRoute: DemoApiAiTtsRoute,
   ApiAgentsAgentIdIndexRoute: ApiAgentsAgentIdIndexRoute,
+  ApiUsersMeIndexRoute: ApiUsersMeIndexRoute,
   ApiAgentsAgentIdGatewayRequestIndexRoute:
     ApiAgentsAgentIdGatewayRequestIndexRoute,
 }

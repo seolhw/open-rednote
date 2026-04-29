@@ -1,9 +1,34 @@
 import { betterAuth } from 'better-auth'
+import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { getPrisma } from '#/db'
+import { env } from '#/env'
 
 export const auth = betterAuth({
+  ...(env.BETTER_AUTH_SECRET ? { secret: env.BETTER_AUTH_SECRET } : {}),
+  ...(env.BETTER_AUTH_URL ? { baseURL: env.BETTER_AUTH_URL } : {}),
+  ...(env.DATABASE_URL
+    ? {
+        database: prismaAdapter(getPrisma(), {
+          provider: 'postgresql',
+        }),
+      }
+    : {}),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
+  },
+  user: {
+    modelName: 'User',
+  },
+  session: {
+    modelName: 'Session',
+  },
+  account: {
+    modelName: 'Account',
+  },
+  verification: {
+    modelName: 'Verification',
   },
   plugins: [tanstackStartCookies()],
 })
