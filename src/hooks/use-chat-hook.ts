@@ -340,7 +340,8 @@ export const useChatHook = () => {
 				method: "GET",
 			});
 			if (!wsInfoResult.ok) return null;
-			const wsChatUrl = extractWsChatUrl({ payload: wsInfoResult.data });
+			// @ts-expect-error
+			const wsChatUrl = wsInfoResult.data.ws.chatUrl;
 			if (!wsChatUrl) return null;
 			wsBaseChatUrlRef.current = wsChatUrl;
 		}
@@ -425,7 +426,8 @@ const unwrapGatewayData = ({ payload }: { payload: unknown }): unknown => {
 const toIdList = ({ payload }: { payload: unknown }): string[] => {
 	const data = unwrapGatewayData({ payload });
 	const root = asRecord({ value: data });
-	const rows = root && Array.isArray(root.items) ? root.items : asArray({ value: data });
+	const rows =
+		root && Array.isArray(root.items) ? root.items : asArray({ value: data });
 	return rows
 		.map((item) => {
 			const row = asRecord({ value: item });
@@ -448,7 +450,8 @@ const toChatSessions = ({
 	const runningIds = new Set(toIdList({ payload: runningPayload }));
 	const data = unwrapGatewayData({ payload: sessionsPayload });
 	const root = asRecord({ value: data });
-	const rows = root && Array.isArray(root.items) ? root.items : asArray({ value: data });
+	const rows =
+		root && Array.isArray(root.items) ? root.items : asArray({ value: data });
 	return rows
 		.map((item) => {
 			const row = asRecord({ value: item });
@@ -456,8 +459,10 @@ const toChatSessions = ({
 			const old = previous.find((p) => p.id === row.id);
 			const rawName = typeof row.name === "string" ? row.name : row.id;
 			const title = runningIds.has(row.id) ? `${rawName} · 运行中` : rawName;
-			const createdAt = typeof row.createdAt === "string" ? row.createdAt : nowIso();
-			const updatedAt = typeof row.updatedAt === "string" ? row.updatedAt : nowIso();
+			const createdAt =
+				typeof row.createdAt === "string" ? row.createdAt : nowIso();
+			const updatedAt =
+				typeof row.updatedAt === "string" ? row.updatedAt : nowIso();
 			return {
 				id: row.id,
 				title,
@@ -496,17 +501,6 @@ const requestGateway = async ({
 		},
 		signal,
 	});
-
-const extractWsChatUrl = ({ payload }: { payload: unknown }): string => {
-	const root = asRecord({ value: payload });
-	if (!root) return "";
-	const data = asRecord({ value: root.data });
-	if (!data) return "";
-	const ws = asRecord({ value: data.ws });
-	if (!ws) return "";
-	const chatUrl = ws.chatUrl;
-	return typeof chatUrl === "string" ? chatUrl : "";
-};
 
 const extractWsTextChunk = ({
 	payload,
