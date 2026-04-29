@@ -14,15 +14,11 @@ export interface AgentListData {
 	items: AgentItem[];
 }
 
-interface SessionIdItem {
-	id: string;
-}
-
 export interface GatewaySessionItem {
-	id: string;
-	name: string;
-	createdAt: string;
-	updatedAt: string;
+	created_at: string;
+	last_activity: string;
+	message_count: number;
+	session_id: string;
 }
 
 export interface GatewaySessionList {
@@ -30,7 +26,7 @@ export interface GatewaySessionList {
 }
 
 export interface GatewayRunningList {
-	sessions: SessionIdItem[];
+	sessions: GatewaySessionItem[];
 }
 
 interface WsConfig {

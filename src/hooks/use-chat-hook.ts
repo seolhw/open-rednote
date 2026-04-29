@@ -10,30 +10,43 @@ import {
 	getWsChatUrl,
 } from "../api/chat";
 
-export type ChatPart =
-	| { type: "text"; content: string }
-	| {
-			type: "tool-call";
-			id: string;
-			name: string;
-			output?: unknown;
-	  };
+export interface ChatTextPart {
+	type: "text";
+	content: string;
+}
 
-export type ChatMessage = {
+export interface ChatToolCallPart {
+	type: "tool-call";
+	id: string;
+	name: string;
+	output?: unknown;
+}
+
+export type ChatPart = ChatTextPart | ChatToolCallPart;
+
+export interface ChatMessage {
 	id: string;
 	role: "user" | "assistant" | "system";
 	parts: ChatPart[];
-};
+}
 
 export type ChatMessages = ChatMessage[];
 
-export type ChatSession = {
+export interface ChatSession {
 	id: string;
 	title: string;
 	messages: ChatMessages;
 	createdAt: string;
 	updatedAt: string;
-};
+}
+
+interface WithSessionId {
+	sessionId: string;
+}
+
+interface WsConnectParams extends WithSessionId {
+	sessionName: string;
+}
 
 const toWsPayload = ({
 	content,
@@ -156,7 +169,7 @@ export const useChatHook = () => {
 		setSelectedSessionId(created.id);
 	};
 
-	const selectSession = ({ sessionId }: { sessionId: string }) => {
+	const selectSession = ({ sessionId }: WithSessionId) => {
 		setSelectedSessionId(sessionId);
 	};
 
@@ -258,10 +271,7 @@ export const useChatHook = () => {
 	async function connectSessionViaWs({
 		sessionId,
 		sessionName,
-	}: {
-		sessionId: string;
-		sessionName: string;
-	}): Promise<WebSocket | null> {
+	}: WsConnectParams): Promise<WebSocket | null> {
 		const agentId = await resolveAgentId();
 		if (!agentId) return null;
 		if (!wsBaseChatUrlRef.current) {
@@ -348,17 +358,19 @@ const toChatSessions = ({
 }): ChatSession[] => {
 	if (!sessionsPayload) return [];
 	const runningIds = new Set(
-		(runningPayload?.sessions ?? []).map((item) => item.id),
+		(runningPayload?.sessions ?? []).map((item) => item.session_id),
 	);
 	return sessionsPayload.sessions.map((row) => {
-		const old = previous.find((p) => p.id === row.id);
-		const title = runningIds.has(row.id) ? `${row.name} · 运行中` : row.name;
+		const old = previous.find((p) => p.id === row.session_id);
+		const title = runningIds.has(row.session_id)
+			? `${row.session_id} · 运行中`
+			: row.session_id;
 		return {
-			id: row.id,
+			id: row.session_id,
 			title,
 			messages: old?.messages ?? [],
-			createdAt: row.createdAt,
-			updatedAt: row.updatedAt,
+			createdAt: row.created_at,
+			updatedAt: row.last_activity,
 		};
 	});
 };
