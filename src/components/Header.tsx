@@ -26,6 +26,12 @@ export default function Header() {
 							GitHub
 						</a>
 					</Button>
+					<Button asChild variant="ghost" size="sm">
+						<Link to="/auth/login">登录</Link>
+					</Button>
+					<Button asChild size="sm">
+						<Link to="/auth/register">注册</Link>
+					</Button>
 				</div>
 			</nav>
 		</header>

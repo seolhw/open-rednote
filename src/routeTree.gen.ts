@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsersIndexRouteImport } from './routes/users/index'
+import { Route as ProfileIndexRouteImport } from './routes/profile/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as ChatIndexRouteImport } from './routes/chat/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -23,6 +24,8 @@ import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as DemoAiStructuredRouteImport } from './routes/demo/ai-structured'
 import { Route as DemoAiImageRouteImport } from './routes/demo/ai-image'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DocsIdIndexRouteImport } from './routes/docs/$id/index'
 import { Route as BlogIdIndexRouteImport } from './routes/blog/$id/index'
 import { Route as ApiAgentsIndexRouteImport } from './routes/api/agents/index'
@@ -46,6 +49,11 @@ const IndexRoute = IndexRouteImport.update({
 const UsersIndexRoute = UsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileIndexRoute = ProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIndexRoute = DocsIndexRouteImport.update({
@@ -106,6 +114,16 @@ const DemoAiStructuredRoute = DemoAiStructuredRouteImport.update({
 const DemoAiImageRoute = DemoAiImageRouteImport.update({
   id: '/demo/ai-image',
   path: '/demo/ai-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsIdIndexRoute = DocsIdIndexRouteImport.update({
@@ -182,6 +200,8 @@ const ApiAgentsAgentIdGatewayRequestIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -194,6 +214,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/users/': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -212,6 +233,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -224,6 +247,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/chat': typeof ChatIndexRoute
   '/docs': typeof DocsIndexRoute
+  '/profile': typeof ProfileIndexRoute
   '/users': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -243,6 +267,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -255,6 +281,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
+  '/profile/': typeof ProfileIndexRoute
   '/users/': typeof UsersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -275,6 +302,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth/login'
+    | '/auth/register'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -287,6 +316,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/chat/'
     | '/docs/'
+    | '/profile/'
     | '/users/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -305,6 +335,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth/login'
+    | '/auth/register'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -317,6 +349,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/chat'
     | '/docs'
+    | '/profile'
     | '/users'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -335,6 +368,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth/login'
+    | '/auth/register'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -347,6 +382,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/chat/'
     | '/docs/'
+    | '/profile/'
     | '/users/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -366,6 +402,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
   DemoAiImageRoute: typeof DemoAiImageRoute
   DemoAiStructuredRoute: typeof DemoAiStructuredRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
@@ -378,6 +416,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   ChatIndexRoute: typeof ChatIndexRoute
   DocsIndexRoute: typeof DocsIndexRoute
+  ProfileIndexRoute: typeof ProfileIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
@@ -409,6 +448,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users/'
       preLoaderRoute: typeof UsersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/': {
+      id: '/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof ProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/': {
@@ -493,6 +539,20 @@ declare module '@tanstack/react-router' {
       path: '/demo/ai-image'
       fullPath: '/demo/ai-image'
       preLoaderRoute: typeof DemoAiImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs/$id/': {
@@ -598,6 +658,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
   DemoAiImageRoute: DemoAiImageRoute,
   DemoAiStructuredRoute: DemoAiStructuredRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
@@ -610,6 +672,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   ChatIndexRoute: ChatIndexRoute,
   DocsIndexRoute: DocsIndexRoute,
+  ProfileIndexRoute: ProfileIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiZeroclawChatRoute: ApiZeroclawChatRoute,
