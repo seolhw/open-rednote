@@ -41,7 +41,7 @@ const buildGatewayUrl = ({
 	return url.toString();
 };
 
-const isBodyMethod = ({ method }: { method: string }) =>
+const isBodyMethod = ({ method }: { method: ZeroClawMethod }) =>
 	method === "POST" || method === "PUT" || method === "PATCH";
 
 export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
@@ -82,15 +82,26 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 					return jsonResponse({ status: 409, data: { error: "Agent 已禁用" } });
 				}
 
+				const endpointResolved = resolveGatewayEndpoint({
+					path: parsed.data.path,
+					method: parsed.data.method,
+				});
+				if (!endpointResolved.ok) {
+					return jsonResponse({
+						status: 400,
+						data: { error: endpointResolved.error },
+					});
+				}
+
 				const targetUrl = buildGatewayUrl({
 					baseUrl: agent.baseUrl,
-					path: parsed.data.path,
+					path: endpointResolved.path,
 					query: parsed.data.query,
 				});
 
 				const contentType = parsed.data.contentType ?? "application/json";
 				const outboundBody =
-					isBodyMethod({ method: parsed.data.method }) &&
+					isBodyMethod({ method: endpointResolved.method }) &&
 					parsed.data.body !== undefined
 						? contentType === "application/json"
 							? JSON.stringify(parsed.data.body)
@@ -107,7 +118,7 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 
 				const settled = await Promise.allSettled([
 					fetch(targetUrl, {
-						method: parsed.data.method,
+						method: endpointResolved.method,
 						headers,
 						body: outboundBody,
 					}),
@@ -142,6 +153,18 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 						status: response.status,
 						contentType: responseContentType,
 						targetUrl,
+						endpoint: {
+							key: endpointResolved.key,
+							path: endpointResolved.path,
+							method: endpointResolved.method,
+						},
+						ws: {
+							chatPath: ZEROCLAW_WS_CHAT_PATH,
+							chatUrl: buildWsChatUrl({
+								baseUrl: agent.baseUrl,
+								token: agent.token,
+							}),
+						},
 						data,
 					},
 				});
@@ -149,3 +172,175 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 		},
 	},
 });
+
+type ZeroClawMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+const ZEROCLAW_WS_CHAT_PATH = "/ws/chat";
+
+const ALLOWED_STATIC_ENDPOINTS: Record<ZeroClawMethod, readonly string[]> = {
+	GET: [
+		"/health",
+		"/metrics",
+		"/pair/code",
+		"/whatsapp",
+		"/wati",
+		"/api/status",
+		"/api/config",
+		"/api/tools",
+		"/api/cron",
+		"/api/cron/settings",
+		"/api/integrations",
+		"/api/integrations/settings",
+		"/api/memory",
+		"/api/cost",
+		"/api/cli-tools",
+		"/api/channels",
+		"/api/health",
+		"/api/sessions",
+		"/api/sessions/running",
+		"/api/devices",
+		"/api/canvas",
+		"/api/events",
+		"/api/events/history",
+	],
+	POST: [
+		"/pair",
+		"/webhook",
+		"/whatsapp",
+		"/linq",
+		"/wati",
+		"/nextcloud-talk",
+		"/webhook/gmail",
+		"/api/cron",
+		"/api/doctor",
+		"/api/memory",
+		"/api/pairing/initiate",
+		"/api/pair",
+	],
+	PUT: ["/api/config"],
+	PATCH: ["/api/cron/settings"],
+	DELETE: [],
+};
+
+const DYNAMIC_ENDPOINT_RULES: Array<{
+	key: string;
+	method: ZeroClawMethod;
+	pattern: RegExp;
+}> = [
+	{ key: "apiCronById", method: "PATCH", pattern: /^\/api\/cron\/[^/]+$/ },
+	{ key: "apiCronById", method: "DELETE", pattern: /^\/api\/cron\/[^/]+$/ },
+	{ key: "apiCronRuns", method: "GET", pattern: /^\/api\/cron\/[^/]+\/runs$/ },
+	{
+		key: "apiMemoryByKey",
+		method: "DELETE",
+		pattern: /^\/api\/memory\/[^/]+$/,
+	},
+	{
+		key: "apiSessionById",
+		method: "DELETE",
+		pattern: /^\/api\/sessions\/[^/]+$/,
+	},
+	{ key: "apiSessionById", method: "PUT", pattern: /^\/api\/sessions\/[^/]+$/ },
+	{
+		key: "apiSessionState",
+		method: "GET",
+		pattern: /^\/api\/sessions\/[^/]+\/state$/,
+	},
+	{
+		key: "apiSessionAbort",
+		method: "POST",
+		pattern: /^\/api\/sessions\/[^/]+\/abort$/,
+	},
+	{
+		key: "apiDeviceById",
+		method: "DELETE",
+		pattern: /^\/api\/devices\/[^/]+$/,
+	},
+	{ key: "apiCanvasById", method: "GET", pattern: /^\/api\/canvas\/[^/]+$/ },
+	{ key: "apiCanvasById", method: "PUT", pattern: /^\/api\/canvas\/[^/]+$/ },
+	{ key: "apiCanvasById", method: "DELETE", pattern: /^\/api\/canvas\/[^/]+$/ },
+	{
+		key: "apiCanvasExecute",
+		method: "POST",
+		pattern: /^\/api\/canvas\/[^/]+\/execute$/,
+	},
+	{
+		key: "apiCanvasExport",
+		method: "GET",
+		pattern: /^\/api\/canvas\/[^/]+\/export$/,
+	},
+	{
+		key: "apiCanvasImport",
+		method: "POST",
+		pattern: /^\/api\/canvas\/[^/]+\/import$/,
+	},
+	{
+		key: "apiCanvasPublish",
+		method: "POST",
+		pattern: /^\/api\/canvas\/[^/]+\/publish$/,
+	},
+	{
+		key: "apiCanvasSubscribe",
+		method: "GET",
+		pattern: /^\/api\/canvas\/[^/]+\/subscribe$/,
+	},
+	{
+		key: "apiCanvasLock",
+		method: "POST",
+		pattern: /^\/api\/canvas\/[^/]+\/lock$/,
+	},
+	{
+		key: "apiCanvasUnlock",
+		method: "POST",
+		pattern: /^\/api\/canvas\/[^/]+\/unlock$/,
+	},
+	{
+		key: "apiCanvasHistory",
+		method: "GET",
+		pattern: /^\/api\/canvas\/[^/]+\/history$/,
+	},
+];
+
+const buildWsChatUrl = ({
+	baseUrl,
+	token,
+}: {
+	baseUrl: string;
+	token: string;
+}) => {
+	const httpUrl = buildGatewayUrl({
+		baseUrl,
+		path: ZEROCLAW_WS_CHAT_PATH,
+		query: { token },
+	});
+	if (httpUrl.startsWith("https://"))
+		return httpUrl.replace("https://", "wss://");
+	if (httpUrl.startsWith("http://")) return httpUrl.replace("http://", "ws://");
+	return httpUrl;
+};
+
+const resolveGatewayEndpoint = ({
+	path,
+	method,
+}: {
+	path: string;
+	method: ZeroClawMethod;
+}):
+	| { ok: true; key: string; path: string; method: ZeroClawMethod }
+	| { ok: false; error: string } => {
+	if (path.includes(":"))
+		return { ok: false, error: "path 不支持模板参数，请传完整路径" };
+	if (path.startsWith("/admin/"))
+		return { ok: false, error: "Admin 接口不允许调用" };
+	if (ALLOWED_STATIC_ENDPOINTS[method].includes(path)) {
+		return { ok: true, key: path, path, method };
+	}
+	const dynamic = DYNAMIC_ENDPOINT_RULES.find(
+		(item) => item.method === method && item.pattern.test(path),
+	);
+	if (!dynamic)
+		return {
+			ok: false,
+			error: `path 不在允许列表中或 method 不匹配: ${method} ${path}`,
+		};
+	return { ok: true, key: dynamic.key, path, method };
+};
