@@ -33,4 +33,69 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-border: var(--border);
+    --color-ring: var(--ring);
+}
+
+:root {
+    --background: hsl(340 100% 99%);
+    --foreground: hsl(340 30% 12%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(340 30% 12%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(340 30% 12%);
+    --primary: hsl(350 100% 57%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(345 100% 96%);
+    --secondary-foreground: hsl(340 35% 20%);
+    --muted: hsl(345 40% 96%);
+    --muted-foreground: hsl(340 12% 45%);
+    --accent: hsl(345 100% 95%);
+    --accent-foreground: hsl(340 35% 20%);
+    --border: hsl(342 35% 89%);
+    --ring: hsl(350 100% 57%);
+}
+
+.dark {
+    --background: hsl(335 24% 8%);
+    --foreground: hsl(340 30% 94%);
+    --card: hsl(334 22% 12%);
+    --card-foreground: hsl(340 30% 94%);
+    --popover: hsl(334 22% 12%);
+    --popover-foreground: hsl(340 30% 94%);
+    --primary: hsl(350 100% 62%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(334 16% 18%);
+    --secondary-foreground: hsl(340 20% 90%);
+    --muted: hsl(334 14% 16%);
+    --muted-foreground: hsl(340 14% 72%);
+    --accent: hsl(334 16% 20%);
+    --accent-foreground: hsl(340 20% 90%);
+    --border: hsl(334 14% 24%);
+    --ring: hsl(350 100% 62%);
+}
+
+@layer base {
+    body {
+        @apply bg-background text-foreground;
+        background-image:
+            radial-gradient(circle at 15% 0%, hsl(350 100% 95% / 0.8), transparent 42%),
+            radial-gradient(circle at 85% 0%, hsl(340 100% 97% / 0.9), transparent 36%);
+        background-attachment: fixed;
+    }
 }
