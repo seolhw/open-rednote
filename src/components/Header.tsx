@@ -16,9 +16,6 @@ export default function Header() {
 						<Link to="/agents">Agent 管理</Link>
 					</Button>
 					<Button asChild variant="ghost" size="sm">
-						<Link to="/about">项目说明</Link>
-					</Button>
-					<Button asChild variant="ghost" size="sm">
 						<a href="https://github.com/seolhw/open-rednote" target="_blank" rel="noreferrer">
 							GitHub
 						</a>
