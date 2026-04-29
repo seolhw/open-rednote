@@ -4,7 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
 	server: {
 		SERVER_URL: z.url().optional(),
-		ZEROCLAW_ACP_URL: z.url().optional(),
+		ZEROCLAW_URL: z.url().optional(),
 		ZEROCLAW_TOKEN: z.string().min(1).optional(),
 		DATABASE_URL: z.string().min(1).optional(),
 	},

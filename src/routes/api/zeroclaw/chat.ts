@@ -11,7 +11,7 @@ const ZeroClawChatBodySchema = z.object({
 	messages: z.array(ZeroClawMessageSchema).min(1),
 });
 
-type ZeroClawAcpResponse = {
+type ZeroClawGatewayResponse = {
 	output?: string;
 	content?: string;
 	message?: {
@@ -21,13 +21,34 @@ type ZeroClawAcpResponse = {
 		output?: string;
 		content?: string;
 	};
+	choices?: Array<{
+		text?: string;
+		delta?: {
+			content?: string;
+		};
+		message?: {
+			content?: string;
+		};
+	}>;
 };
 
-const extractAcpContent = ({
+const extractGatewayContent = ({
 	payload,
 }: {
-	payload: ZeroClawAcpResponse;
+	payload: ZeroClawGatewayResponse;
 }): string => {
+	if (typeof payload.choices?.[0]?.message?.content === "string") {
+		return payload.choices[0].message.content.trim();
+	}
+
+	if (typeof payload.choices?.[0]?.delta?.content === "string") {
+		return payload.choices[0].delta.content.trim();
+	}
+
+	if (typeof payload.choices?.[0]?.text === "string") {
+		return payload.choices[0].text.trim();
+	}
+
 	if (typeof payload.output === "string") {
 		return payload.output.trim();
 	}
@@ -51,7 +72,7 @@ const extractAcpContent = ({
 	return "";
 };
 
-export const Route = createFileRoute("/api/zeroclaw/acp/chat")({
+export const Route = createFileRoute("/api/zeroclaw/chat")({
 	server: {
 		handlers: {
 			POST: async ({ request }) => {
@@ -72,14 +93,14 @@ export const Route = createFileRoute("/api/zeroclaw/acp/chat")({
 					);
 				}
 
-				if (!env.ZEROCLAW_ACP_URL || !env.ZEROCLAW_TOKEN) {
-					console.error("[zeroclaw-chat] missing env", {
-						hasAcpUrl: Boolean(env.ZEROCLAW_ACP_URL),
+				if (!env.ZEROCLAW_URL || !env.ZEROCLAW_TOKEN) {
+					console.error("[zeroclaw-gateway-chat] missing env", {
+						hasGatewayRestUrl: Boolean(env.ZEROCLAW_URL),
 						hasToken: Boolean(env.ZEROCLAW_TOKEN),
 					});
 					return new Response(
 						JSON.stringify({
-							error: "ZEROCLAW_ACP_URL 或 ZEROCLAW_TOKEN 未配置",
+							error: "ZEROCLAW_URL 或 ZEROCLAW_TOKEN 未配置",
 						}),
 						{
 							status: 500,
@@ -93,7 +114,7 @@ export const Route = createFileRoute("/api/zeroclaw/acp/chat")({
 						.filter((message) => message.role === "user")
 						.at(-1)?.content ?? "";
 
-				const response = await fetch(env.ZEROCLAW_ACP_URL, {
+				const response = await fetch(env.ZEROCLAW_URL, {
 					method: "POST",
 					headers: {
 						Authorization: `Bearer ${env.ZEROCLAW_TOKEN}`,
@@ -102,20 +123,22 @@ export const Route = createFileRoute("/api/zeroclaw/acp/chat")({
 					body: JSON.stringify({
 						input: userInput,
 						messages: parsed.data.messages,
+						mode: "rest",
+						stream: false,
 					}),
 				});
 
 				if (!response.ok) {
 					const errorText = await response.text();
-					console.error("[zeroclaw-chat] upstream acp request failed", {
+					console.error("[zeroclaw-gateway-chat] upstream rest request failed", {
 						status: response.status,
 						statusText: response.statusText,
-						url: env.ZEROCLAW_ACP_URL,
+						url: env.ZEROCLAW_URL,
 						errorText,
 					});
 					return new Response(
 						JSON.stringify({
-							error: "ZeroClaw ACP 请求失败",
+							error: "ZeroClaw Gateway REST 请求失败",
 							details: errorText || `status=${response.status}`,
 						}),
 						{
@@ -125,12 +148,13 @@ export const Route = createFileRoute("/api/zeroclaw/acp/chat")({
 					);
 				}
 
-				const payload = (await response.json()) as ZeroClawAcpResponse;
-				const content = extractAcpContent({ payload });
+				const payload = (await response.json()) as ZeroClawGatewayResponse;
+				const content = extractGatewayContent({ payload });
 
 				return new Response(
 					JSON.stringify({
-						content: content || "ZeroClaw ACP 暂无返回内容",
+						content: content || "ZeroClaw Gateway 暂无返回内容",
+						wsUrl: env.ZEROCLAW_URL ?? null,
 					}),
 					{
 						status: 200,

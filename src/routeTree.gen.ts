@@ -22,13 +22,12 @@ import { Route as DemoAiStructuredRouteImport } from './routes/demo/ai-structure
 import { Route as DemoAiImageRouteImport } from './routes/demo/ai-image'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
+import { Route as ApiZeroclawChatRouteImport } from './routes/api/zeroclaw/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as DemoApiAiTtsRouteImport } from './routes/demo/api.ai.tts'
 import { Route as DemoApiAiTranscriptionRouteImport } from './routes/demo/api.ai.transcription'
 import { Route as DemoApiAiStructuredRouteImport } from './routes/demo/api.ai.structured'
 import { Route as DemoApiAiImageRouteImport } from './routes/demo/api.ai.image'
-import { Route as ApiZeroclawAcpChatRouteImport } from './routes/api/zeroclaw/acp.chat'
-import { Route as DemoApiZeroclawAcpChatRouteImport } from './routes/demo/api.zeroclaw.acp.chat'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
@@ -95,6 +94,11 @@ const DemoFormAddressRoute = DemoFormAddressRouteImport.update({
   path: '/demo/form/address',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiZeroclawChatRoute = ApiZeroclawChatRouteImport.update({
+  id: '/api/zeroclaw/chat',
+  path: '/api/zeroclaw/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -120,16 +124,6 @@ const DemoApiAiImageRoute = DemoApiAiImageRouteImport.update({
   path: '/demo/api/ai/image',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiZeroclawAcpChatRoute = ApiZeroclawAcpChatRouteImport.update({
-  id: '/api/zeroclaw/acp/chat',
-  path: '/api/zeroclaw/acp/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoApiZeroclawAcpChatRoute = DemoApiZeroclawAcpChatRouteImport.update({
-  id: '/demo/api/zeroclaw/acp/chat',
-  path: '/demo/api/zeroclaw/acp/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -144,14 +138,13 @@ export interface FileRoutesByFullPath {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/zeroclaw/acp/chat': typeof ApiZeroclawAcpChatRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
-  '/demo/api/zeroclaw/acp/chat': typeof DemoApiZeroclawAcpChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -166,14 +159,13 @@ export interface FileRoutesByTo {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/zeroclaw/acp/chat': typeof ApiZeroclawAcpChatRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
-  '/demo/api/zeroclaw/acp/chat': typeof DemoApiZeroclawAcpChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,14 +181,13 @@ export interface FileRoutesById {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
-  '/api/zeroclaw/acp/chat': typeof ApiZeroclawAcpChatRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
-  '/demo/api/zeroclaw/acp/chat': typeof DemoApiZeroclawAcpChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -213,14 +204,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/api/auth/$'
+    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/zeroclaw/acp/chat'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
-    | '/demo/api/zeroclaw/acp/chat'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -235,14 +225,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/api/auth/$'
+    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/zeroclaw/acp/chat'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
-    | '/demo/api/zeroclaw/acp/chat'
   id:
     | '__root__'
     | '/'
@@ -257,14 +246,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/api/auth/$'
+    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
-    | '/api/zeroclaw/acp/chat'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
-    | '/demo/api/zeroclaw/acp/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -280,14 +268,13 @@ export interface RootRouteChildren {
   DemoStoreRoute: typeof DemoStoreRoute
   DemoTableRoute: typeof DemoTableRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
-  ApiZeroclawAcpChatRoute: typeof ApiZeroclawAcpChatRoute
   DemoApiAiImageRoute: typeof DemoApiAiImageRoute
   DemoApiAiStructuredRoute: typeof DemoApiAiStructuredRoute
   DemoApiAiTranscriptionRoute: typeof DemoApiAiTranscriptionRoute
   DemoApiAiTtsRoute: typeof DemoApiAiTtsRoute
-  DemoApiZeroclawAcpChatRoute: typeof DemoApiZeroclawAcpChatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -383,6 +370,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoFormAddressRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/zeroclaw/chat': {
+      id: '/api/zeroclaw/chat'
+      path: '/api/zeroclaw/chat'
+      fullPath: '/api/zeroclaw/chat'
+      preLoaderRoute: typeof ApiZeroclawChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -418,20 +412,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiAiImageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/zeroclaw/acp/chat': {
-      id: '/api/zeroclaw/acp/chat'
-      path: '/api/zeroclaw/acp/chat'
-      fullPath: '/api/zeroclaw/acp/chat'
-      preLoaderRoute: typeof ApiZeroclawAcpChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/api/zeroclaw/acp/chat': {
-      id: '/demo/api/zeroclaw/acp/chat'
-      path: '/demo/api/zeroclaw/acp/chat'
-      fullPath: '/demo/api/zeroclaw/acp/chat'
-      preLoaderRoute: typeof DemoApiZeroclawAcpChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -448,14 +428,13 @@ const rootRouteChildren: RootRouteChildren = {
   DemoStoreRoute: DemoStoreRoute,
   DemoTableRoute: DemoTableRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
-  ApiZeroclawAcpChatRoute: ApiZeroclawAcpChatRoute,
   DemoApiAiImageRoute: DemoApiAiImageRoute,
   DemoApiAiStructuredRoute: DemoApiAiStructuredRoute,
   DemoApiAiTranscriptionRoute: DemoApiAiTranscriptionRoute,
   DemoApiAiTtsRoute: DemoApiAiTtsRoute,
-  DemoApiZeroclawAcpChatRoute: DemoApiZeroclawAcpChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
