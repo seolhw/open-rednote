@@ -99,7 +99,12 @@ function Messages({
 							}`}
 						>
 							<div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
-								<Badge variant={message.role === "assistant" ? "default" : "secondary"} className="mt-1 h-8 w-8 justify-center rounded-lg p-0">
+								<Badge
+									variant={
+										message.role === "assistant" ? "default" : "secondary"
+									}
+									className="mt-1 h-8 w-8 justify-center rounded-lg p-0"
+								>
 									{message.role === "assistant" ? "AI" : "Y"}
 								</Badge>
 								<div className="flex-1 min-w-0">
@@ -123,10 +128,18 @@ function Messages({
 										type="button"
 										variant="ghost"
 										size="icon-sm"
-										onClick={() => (isPlaying ? onStopSpeak() : onSpeak(textContent, message.id))}
+										onClick={() =>
+											isPlaying
+												? onStopSpeak()
+												: onSpeak(textContent, message.id)
+										}
 										title={isPlaying ? "Stop speaking" : "Read aloud"}
 									>
-										{isPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+										{isPlaying ? (
+											<VolumeX className="h-4 w-4" />
+										) : (
+											<Volume2 className="h-4 w-4" />
+										)}
 									</Button>
 								)}
 							</div>
@@ -201,7 +214,13 @@ function ChatPage() {
 									disabled={isLoading || isTranscribing}
 									title={isRecording ? "Stop recording" : "Start recording"}
 								>
-									{isTranscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+									{isTranscribing ? (
+										<Loader2 className="h-4 w-4 animate-spin" />
+									) : isRecording ? (
+										<MicOff className="h-4 w-4" />
+									) : (
+										<Mic className="h-4 w-4" />
+									)}
 								</Button>
 
 								<div className="relative flex-1">
@@ -246,6 +265,6 @@ function ChatPage() {
 	);
 }
 
-export const Route = createFileRoute("/chat")({
+export const Route = createFileRoute("/chat/")({
 	component: ChatPage,
 });

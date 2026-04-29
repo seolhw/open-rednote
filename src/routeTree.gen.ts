@@ -9,9 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DocsIndexRouteImport } from './routes/docs/index'
+import { Route as ChatIndexRouteImport } from './routes/chat/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
@@ -36,11 +36,6 @@ import { Route as DemoApiAiStructuredRouteImport } from './routes/demo/api.ai.st
 import { Route as DemoApiAiImageRouteImport } from './routes/demo/api.ai.image'
 import { Route as ApiAgentsAgentIdGatewayRequestIndexRouteImport } from './routes/api/agents/$agentId/gateway/request/index'
 
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -50,6 +45,11 @@ const DocsIndexRoute = DocsIndexRouteImport.update({
   id: '/docs/',
   path: '/docs/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatRoute,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
@@ -170,7 +170,6 @@ const ApiAgentsAgentIdGatewayRequestIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -181,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/demo/table': typeof DemoTableRoute
   '/agents/': typeof AgentsIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -198,7 +198,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -209,6 +208,7 @@ export interface FileRoutesByTo {
   '/demo/table': typeof DemoTableRoute
   '/agents': typeof AgentsIndexRoute
   '/blog': typeof BlogIndexRoute
+  '/chat': typeof ChatIndexRoute
   '/docs': typeof DocsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -227,7 +227,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
   '/demo/ai-image': typeof DemoAiImageRoute
   '/demo/ai-structured': typeof DemoAiStructuredRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
@@ -238,6 +237,7 @@ export interface FileRoutesById {
   '/demo/table': typeof DemoTableRoute
   '/agents/': typeof AgentsIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/chat/': typeof ChatIndexRoute
   '/docs/': typeof DocsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
@@ -257,7 +257,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/chat'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -268,6 +267,7 @@ export interface FileRouteTypes {
     | '/demo/table'
     | '/agents/'
     | '/blog/'
+    | '/chat/'
     | '/docs/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -285,7 +285,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/chat'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -296,6 +295,7 @@ export interface FileRouteTypes {
     | '/demo/table'
     | '/agents'
     | '/blog'
+    | '/chat'
     | '/docs'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -313,7 +313,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/chat'
     | '/demo/ai-image'
     | '/demo/ai-structured'
     | '/demo/better-auth'
@@ -324,6 +323,7 @@ export interface FileRouteTypes {
     | '/demo/table'
     | '/agents/'
     | '/blog/'
+    | '/chat/'
     | '/docs/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
@@ -342,7 +342,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRoute
   DemoAiImageRoute: typeof DemoAiImageRoute
   DemoAiStructuredRoute: typeof DemoAiStructuredRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
@@ -371,13 +370,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -391,6 +383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/'
       preLoaderRoute: typeof DocsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/chat/': {
+      id: '/chat/'
+      path: '/'
+      fullPath: '/chat/'
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
     }
     '/blog/': {
       id: '/blog/'
@@ -558,7 +557,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatRoute: ChatRoute,
   DemoAiImageRoute: DemoAiImageRoute,
   DemoAiStructuredRoute: DemoAiStructuredRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
