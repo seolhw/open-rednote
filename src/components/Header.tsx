@@ -15,6 +15,9 @@ export default function Header() {
 					<Button asChild variant="ghost" size="sm">
 						<Link to="/agents">Agent 管理</Link>
 					</Button>
+							<Button asChild variant="ghost" size="sm">
+						<Link to="/docs">文档</Link>
+					</Button>
 					<Button asChild variant="ghost" size="sm">
 						<Link to="/blog">Blog</Link>
 					</Button>

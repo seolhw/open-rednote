@@ -20,6 +20,7 @@ function App() {
 					<Button asChild><a href="/about">查看项目说明</a></Button>
 					<Button asChild variant="outline"><a href="/chat">打开 AI 助手</a></Button>
 					<Button asChild variant="secondary"><a href="/blog">阅读 Blog</a></Button>
+					<Button asChild variant="secondary"><a href="/docs">阅读文档</a></Button>
 				</CardContent>
 			</Card>
 
