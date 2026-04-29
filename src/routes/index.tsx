@@ -19,6 +19,7 @@ function App() {
 				<CardContent className="flex flex-wrap gap-3">
 					<Button asChild><a href="/about">查看项目说明</a></Button>
 					<Button asChild variant="outline"><a href="/chat">打开 AI 助手</a></Button>
+					<Button asChild variant="secondary"><a href="/blog">阅读 Blog</a></Button>
 				</CardContent>
 			</Card>
 

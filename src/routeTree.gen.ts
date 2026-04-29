@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoStoreRouteImport } from './routes/demo/store'
@@ -20,6 +21,7 @@ import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as DemoAiStructuredRouteImport } from './routes/demo/ai-structured'
 import { Route as DemoAiImageRouteImport } from './routes/demo/ai-image'
+import { Route as BlogIdIndexRouteImport } from './routes/blog/$id/index'
 import { Route as ApiAgentsIndexRouteImport } from './routes/api/agents/index'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
@@ -41,6 +43,11 @@ const ChatRoute = ChatRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgentsIndexRoute = AgentsIndexRouteImport.update({
@@ -86,6 +93,11 @@ const DemoAiStructuredRoute = DemoAiStructuredRouteImport.update({
 const DemoAiImageRoute = DemoAiImageRouteImport.update({
   id: '/demo/ai-image',
   path: '/demo/ai-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIdIndexRoute = BlogIdIndexRouteImport.update({
+  id: '/blog/$id/',
+  path: '/blog/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAgentsIndexRoute = ApiAgentsIndexRouteImport.update({
@@ -163,11 +175,13 @@ export interface FileRoutesByFullPath {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/agents/': typeof AgentsIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agents/': typeof ApiAgentsIndexRoute
+  '/blog/$id/': typeof BlogIdIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
@@ -188,11 +202,13 @@ export interface FileRoutesByTo {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/agents': typeof AgentsIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agents': typeof ApiAgentsIndexRoute
+  '/blog/$id': typeof BlogIdIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
@@ -214,11 +230,13 @@ export interface FileRoutesById {
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
   '/agents/': typeof AgentsIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agents/': typeof ApiAgentsIndexRoute
+  '/blog/$id/': typeof BlogIdIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
@@ -241,11 +259,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/agents/'
+    | '/blog/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agents/'
+    | '/blog/$id/'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
@@ -266,11 +286,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/agents'
+    | '/blog'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agents'
+    | '/blog/$id'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
@@ -291,11 +313,13 @@ export interface FileRouteTypes {
     | '/demo/store'
     | '/demo/table'
     | '/agents/'
+    | '/blog/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agents/'
+    | '/blog/$id/'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
@@ -317,11 +341,13 @@ export interface RootRouteChildren {
   DemoStoreRoute: typeof DemoStoreRoute
   DemoTableRoute: typeof DemoTableRoute
   AgentsIndexRoute: typeof AgentsIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
   ApiAgentsIndexRoute: typeof ApiAgentsIndexRoute
+  BlogIdIndexRoute: typeof BlogIdIndexRoute
   DemoApiAiImageRoute: typeof DemoApiAiImageRoute
   DemoApiAiStructuredRoute: typeof DemoApiAiStructuredRoute
   DemoApiAiTranscriptionRoute: typeof DemoApiAiTranscriptionRoute
@@ -345,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agents/': {
@@ -408,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/ai-image'
       fullPath: '/demo/ai-image'
       preLoaderRoute: typeof DemoAiImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$id/': {
+      id: '/blog/$id/'
+      path: '/blog/$id'
+      fullPath: '/blog/$id/'
+      preLoaderRoute: typeof BlogIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/agents/': {
@@ -509,11 +549,13 @@ const rootRouteChildren: RootRouteChildren = {
   DemoStoreRoute: DemoStoreRoute,
   DemoTableRoute: DemoTableRoute,
   AgentsIndexRoute: AgentsIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
   ApiAgentsIndexRoute: ApiAgentsIndexRoute,
+  BlogIdIndexRoute: BlogIdIndexRoute,
   DemoApiAiImageRoute: DemoApiAiImageRoute,
   DemoApiAiStructuredRoute: DemoApiAiStructuredRoute,
   DemoApiAiTranscriptionRoute: DemoApiAiTranscriptionRoute,

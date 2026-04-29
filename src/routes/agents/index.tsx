@@ -53,6 +53,7 @@ const emptyCreateForm = {
 const emptyEditForm = {
 	name: "",
 	baseUrl: "",
+	token: "",
 	description: "",
 };
 
@@ -208,6 +209,7 @@ function AgentsCardListPage() {
 		setEditForm({
 			name: agent.name,
 			baseUrl: agent.baseUrl,
+			token: "",
 			description: agent.description ?? "",
 		});
 		setEditOpen(true);
@@ -223,6 +225,7 @@ function AgentsCardListPage() {
 			body: {
 				name: editForm.name.trim(),
 				baseUrl: editForm.baseUrl.trim(),
+				token: editForm.token.trim() || undefined,
 				description: editForm.description.trim() || null,
 			},
 		});
@@ -420,6 +423,16 @@ function AgentsCardListPage() {
 							value={editForm.baseUrl}
 							onChange={(e) =>
 								setEditForm((p) => ({ ...p, baseUrl: e.target.value }))
+							}
+						/>
+						<Label htmlFor="editToken">Token</Label>
+						<Input
+							id="editToken"
+							type="password"
+							placeholder="留空则不修改"
+							value={editForm.token}
+							onChange={(e) =>
+								setEditForm((p) => ({ ...p, token: e.target.value }))
 							}
 						/>
 						<Label htmlFor="editDescription">描述</Label>
