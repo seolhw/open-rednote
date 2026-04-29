@@ -196,7 +196,7 @@ function ChatPage() {
 	};
 
 	return (
-		<div className="mx-auto mt-6 grid h-[calc(100vh-180px)] min-h-[640px] w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
+		<div className="mx-auto mt-6 grid flex-1 min-h-[640px] w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
 			<Card className="overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
 				<div className="mb-3 flex items-center justify-between">
 					<p className="text-sm font-semibold">会话</p>

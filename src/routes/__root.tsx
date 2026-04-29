@@ -54,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 			<body className="flex min-h-screen flex-col justify-between font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(255,36,66,0.22)]">
 				<Header />
-				<main className="flex-1">
+				<main className="flex-1 flex">
 					<TooltipProvider>{children}</TooltipProvider>
 				</main>
 				<Footer />

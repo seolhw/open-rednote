@@ -105,53 +105,30 @@ const requestJson = async ({
 	};
 };
 
-const getTextPart = ({ message }: { message: ChatMessage }): string => {
-	const textPart = message.parts.find((part) => part.type === "text");
-	if (!textPart || textPart.type !== "text") {
-		return "";
-	}
-	return textPart.content;
-};
-
-const toConversationText = ({ messages }: { messages: ChatMessages }): string =>
-	messages
-		.map((item) => `${item.role}: ${getTextPart({ message: item })}`)
-		.filter((item) => item.length > 0)
-		.join("\n");
-
-const extractAssistantContent = ({ payload }: { payload: unknown }): string => {
-	if (!payload || typeof payload !== "object") {
-		return "";
-	}
-	const dataField = (payload as { data?: unknown }).data;
-
-	if (typeof dataField === "string") {
-		return dataField;
-	}
-	if (!dataField || typeof dataField !== "object") {
-		return "";
-	}
-
-	const responseText = (dataField as { response?: unknown }).response;
-	if (typeof responseText === "string") {
-		return responseText;
-	}
-
-	const contentText = (dataField as { content?: unknown }).content;
-	if (typeof contentText === "string") {
-		return contentText;
-	}
-
-	const messageContent = (dataField as { message?: { content?: unknown } })
-		.message?.content;
-	if (typeof messageContent === "string") {
-		return messageContent;
-	}
-
-	return "";
-};
+const toWsPayload = ({
+	content,
+	sessionId,
+	sessionName,
+}: {
+	content: string;
+	sessionId: string;
+	sessionName: string;
+}) => ({
+	type: "message",
+	content,
+	session_id: sessionId,
+	name: sessionName,
+});
 
 const nowIso = () => new Date().toISOString();
+
+const createLocalSession = ({ title }: { title: string }): ChatSession => ({
+	id: crypto.randomUUID(),
+	title,
+	messages: [],
+	createdAt: nowIso(),
+	updatedAt: nowIso(),
+});
 
 const appendMessageToSession = ({
 	sessions,
@@ -173,79 +150,36 @@ const appendMessageToSession = ({
 	);
 
 export const useChatHook = () => {
-	const [sessions, setSessions] = useState<ChatSession[]>([]);
-	const [selectedSessionId, setSelectedSessionId] = useState("");
+	const initialLocalSession = createLocalSession({ title: "新会话" });
+	const [sessions, setSessions] = useState<ChatSession[]>([
+		initialLocalSession,
+	]);
+	const [selectedSessionId, setSelectedSessionId] = useState(
+		initialLocalSession.id,
+	);
 	const [isLoading, setIsLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 	const preferredAgentIdRef = useRef<string | null>(null);
 	const wsBaseChatUrlRef = useRef("");
 	const wsSocketRef = useRef<WebSocket | null>(null);
 	const activeWsSessionIdRef = useRef("");
+	const pendingSessionIdRef = useRef("");
+	const streamBufferRef = useRef("");
 
 	const selectedSession =
 		sessions.find((item) => item.id === selectedSessionId) ?? sessions[0];
 	const messages = selectedSession?.messages ?? [];
 
-	const refreshSessions = async ({ signal }: { signal?: AbortSignal }) => {
-		const agentId = await resolveAgentId({ signal });
-		if (!agentId) return;
-		const [listResult, runningResult] = await Promise.all([
-			requestGateway({
-				agentId,
-				path: "/api/sessions",
-				method: "GET",
-				signal,
-			}),
-			requestGateway({
-				agentId,
-				path: "/api/sessions/running",
-				method: "GET",
-				signal,
-			}),
-		]);
-		if (!listResult.ok) return;
-		const next = toChatSessions({
-			sessionsPayload: listResult.data,
-			runningPayload: runningResult.ok ? runningResult.data : null,
-			previous: sessions,
-		});
-		setSessions(next);
-		if (!selectedSessionId && next[0]) setSelectedSessionId(next[0].id);
-		if (
-			selectedSessionId &&
-			!next.find((item) => item.id === selectedSessionId) &&
-			next[0]
-		) {
-			setSelectedSessionId(next[0].id);
-		}
-	};
-
 	const createSession = () => {
-		const created: ChatSession = {
-			id: crypto.randomUUID(),
+		const created = createLocalSession({
 			title: `新会话 ${sessions.length + 1}`,
-			messages: [],
-			createdAt: nowIso(),
-			updatedAt: nowIso(),
-		};
+		});
 		setSessions((prev) => [created, ...prev]);
 		setSelectedSessionId(created.id);
-		void connectSessionViaWs({
-			sessionId: created.id,
-			sessionName: created.title,
-		});
 	};
 
 	const selectSession = ({ sessionId }: { sessionId: string }) => {
 		setSelectedSessionId(sessionId);
-		const current = sessions.find((item) => item.id === sessionId);
-		void loadSessionState({ sessionId });
-		if (current) {
-			void connectSessionViaWs({
-				sessionId: current.id,
-				sessionName: current.title,
-			});
-		}
 	};
 
 	const resolveAgentId = async ({
@@ -267,20 +201,48 @@ export const useChatHook = () => {
 		return target.id;
 	};
 
+	const refreshSessions = async ({ signal }: { signal?: AbortSignal }) => {
+		const agentId = await resolveAgentId({ signal });
+		if (!agentId) return;
+		const [sessionsResult, runningResult] = await Promise.all([
+			requestGateway({
+				agentId,
+				path: "/api/sessions",
+				method: "GET",
+				signal,
+			}),
+			requestGateway({
+				agentId,
+				path: "/api/sessions/running",
+				method: "GET",
+				signal,
+			}),
+		]);
+		if (!sessionsResult.ok) return;
+		setSessions((previous) => {
+			const merged = toChatSessions({
+				sessionsPayload: sessionsResult.data,
+				runningPayload: runningResult.ok ? runningResult.data : null,
+				previous,
+			});
+			if (!merged.length) return previous;
+			setSelectedSessionId((current) =>
+				current && merged.some((item) => item.id === current)
+					? current
+					: merged[0].id,
+			);
+			return merged;
+		});
+	};
+
 	const sendMessage = async (input: string) => {
 		const content = input.trim();
 		if (!content || !selectedSession || !selectedSession.id) return;
-		void connectSessionViaWs({
-			sessionId: selectedSession.id,
-			sessionName: selectedSession.title,
-		});
 		const userMessage: ChatMessage = {
 			id: crypto.randomUUID(),
 			role: "user",
 			parts: [{ type: "text", content }],
 		};
-		const baseMessages = selectedSession.messages;
-		const nextMessages = [...baseMessages, userMessage];
 		setSessions((prev) =>
 			appendMessageToSession({
 				sessions: prev,
@@ -289,15 +251,15 @@ export const useChatHook = () => {
 			}),
 		);
 		setIsLoading(true);
-		const controller = new AbortController();
-		abortRef.current = controller;
-
-		const agentId = await resolveAgentId({ signal: controller.signal });
-		if (!agentId) {
+		const socket = await connectSessionViaWs({
+			sessionId: selectedSession.id,
+			sessionName: selectedSession.title,
+		});
+		if (!socket || socket.readyState !== WebSocket.OPEN) {
 			const errorMessage: ChatMessage = {
 				id: crypto.randomUUID(),
 				role: "assistant",
-				parts: [{ type: "text", content: "没有可用的已启用 Agent" }],
+				parts: [{ type: "text", content: "WebSocket 未连接，无法发送消息" }],
 			};
 			setSessions((prev) =>
 				appendMessageToSession({
@@ -307,75 +269,17 @@ export const useChatHook = () => {
 				}),
 			);
 			setIsLoading(false);
-			abortRef.current = null;
 			return;
 		}
-
-		const result = await requestGateway({
-			agentId,
-			path: "/webhook",
-			method: "POST",
-			body: {
-				message: content,
-				session_id: selectedSession.id,
-				name: selectedSession.title,
-				context: toConversationText({ messages: nextMessages }),
-			},
-			signal: controller.signal,
-		});
-
-		if (!result.ok) {
-			const errorMessage: ChatMessage = {
-				id: crypto.randomUUID(),
-				role: "assistant",
-				parts: [{ type: "text", content: `Agent 请求失败(${result.status})` }],
-			};
-			setSessions((prev) =>
-				appendMessageToSession({
-					sessions: prev,
+		pendingSessionIdRef.current = selectedSession.id;
+		streamBufferRef.current = "";
+		socket.send(
+			JSON.stringify(
+				toWsPayload({
+					content,
 					sessionId: selectedSession.id,
-					message: errorMessage,
+					sessionName: selectedSession.title,
 				}),
-			);
-			setIsLoading(false);
-			abortRef.current = null;
-			return;
-		}
-
-		const assistantText =
-			extractAssistantContent({ payload: result.data }) || "Agent 暂无返回内容";
-		const assistantMessage: ChatMessage = {
-			id: crypto.randomUUID(),
-			role: "assistant",
-			parts: [{ type: "text", content: assistantText }],
-		};
-		setSessions((prev) =>
-			appendMessageToSession({
-				sessions: prev,
-				sessionId: selectedSession.id,
-				message: assistantMessage,
-			}),
-		);
-		setIsLoading(false);
-		abortRef.current = null;
-	};
-
-	const loadSessionState = async ({ sessionId }: { sessionId: string }) => {
-		const agentId = await resolveAgentId({});
-		if (!agentId || !sessionId) return;
-		const stateResult = await requestGateway({
-			agentId,
-			path: `/api/sessions/${encodeURIComponent(sessionId)}/state`,
-			method: "GET",
-		});
-		if (!stateResult.ok) return;
-		const stateMessages = toStateMessages({ payload: stateResult.data });
-		if (!stateMessages.length) return;
-		setSessions((prev) =>
-			prev.map((item) =>
-				item.id === sessionId
-					? { ...item, messages: stateMessages, updatedAt: nowIso() }
-					: item,
 			),
 		);
 	};
@@ -426,22 +330,27 @@ export const useChatHook = () => {
 	}: {
 		sessionId: string;
 		sessionName: string;
-	}) {
+	}): Promise<WebSocket | null> {
 		const agentId = await resolveAgentId({});
-		if (!agentId) return;
+		if (!agentId) return null;
 		if (!wsBaseChatUrlRef.current) {
 			const wsInfoResult = await requestGateway({
 				agentId,
 				path: "/health",
 				method: "GET",
 			});
-			if (!wsInfoResult.ok) return;
+			if (!wsInfoResult.ok) return null;
 			const wsChatUrl = extractWsChatUrl({ payload: wsInfoResult.data });
-			if (!wsChatUrl) return;
+			if (!wsChatUrl) return null;
 			wsBaseChatUrlRef.current = wsChatUrl;
 		}
-		if (activeWsSessionIdRef.current === sessionId && wsSocketRef.current)
-			return;
+		if (
+			activeWsSessionIdRef.current === sessionId &&
+			wsSocketRef.current &&
+			wsSocketRef.current.readyState === WebSocket.OPEN
+		) {
+			return wsSocketRef.current;
+		}
 		if (wsSocketRef.current) {
 			wsSocketRef.current.close();
 			wsSocketRef.current = null;
@@ -453,12 +362,49 @@ export const useChatHook = () => {
 		socket.onopen = () => {
 			activeWsSessionIdRef.current = sessionId;
 		};
-		socket.onclose = () => {
-			if (activeWsSessionIdRef.current === sessionId) {
-				activeWsSessionIdRef.current = "";
+		socket.onmessage = (event) => {
+			const raw = typeof event.data === "string" ? event.data : "";
+			if (!raw) return;
+			const payload = JSON.parse(raw) as Record<string, unknown>;
+			const textChunk = extractWsTextChunk({ payload });
+			if (textChunk) {
+				streamBufferRef.current = `${streamBufferRef.current}${textChunk}`;
+			}
+			const type = typeof payload.type === "string" ? payload.type : "";
+			if (type === "done" || type === "message") {
+				const finalText =
+					extractWsFinalText({ payload }) ||
+					streamBufferRef.current ||
+					"Agent 暂无返回内容";
+				const sessionIdForReply = pendingSessionIdRef.current;
+				if (sessionIdForReply) {
+					const assistantMessage: ChatMessage = {
+						id: crypto.randomUUID(),
+						role: "assistant",
+						parts: [{ type: "text", content: finalText }],
+					};
+					setSessions((prev) =>
+						appendMessageToSession({
+							sessions: prev,
+							sessionId: sessionIdForReply,
+							message: assistantMessage,
+						}),
+					);
+				}
+				pendingSessionIdRef.current = "";
+				streamBufferRef.current = "";
+				setIsLoading(false);
 			}
 		};
+		socket.onclose = () => {
+			if (activeWsSessionIdRef.current === sessionId)
+				activeWsSessionIdRef.current = "";
+		};
 		wsSocketRef.current = socket;
+		return new Promise((resolve) => {
+			socket.addEventListener("open", () => resolve(socket), { once: true });
+			socket.addEventListener("error", () => resolve(null), { once: true });
+		});
 	}
 };
 
@@ -476,8 +422,11 @@ const unwrapGatewayData = ({ payload }: { payload: unknown }): unknown => {
 	return "data" in record ? record.data : payload;
 };
 
-const toIdList = ({ payload }: { payload: unknown }): string[] =>
-	asArray({ value: unwrapGatewayData({ payload }) })
+const toIdList = ({ payload }: { payload: unknown }): string[] => {
+	const data = unwrapGatewayData({ payload });
+	const root = asRecord({ value: data });
+	const rows = root && Array.isArray(root.items) ? root.items : asArray({ value: data });
+	return rows
 		.map((item) => {
 			const row = asRecord({ value: item });
 			if (!row) return "";
@@ -485,6 +434,7 @@ const toIdList = ({ payload }: { payload: unknown }): string[] =>
 			return typeof id === "string" ? id : "";
 		})
 		.filter((item) => item.length > 0);
+};
 
 const toChatSessions = ({
 	sessionsPayload,
@@ -496,52 +446,27 @@ const toChatSessions = ({
 	previous: ChatSession[];
 }): ChatSession[] => {
 	const runningIds = new Set(toIdList({ payload: runningPayload }));
-	const rows = asArray({
-		value: unwrapGatewayData({ payload: sessionsPayload }),
-	});
+	const data = unwrapGatewayData({ payload: sessionsPayload });
+	const root = asRecord({ value: data });
+	const rows = root && Array.isArray(root.items) ? root.items : asArray({ value: data });
 	return rows
 		.map((item) => {
 			const row = asRecord({ value: item });
 			if (!row || typeof row.id !== "string") return null;
 			const old = previous.find((p) => p.id === row.id);
-			const titleRaw = typeof row.name === "string" ? row.name : row.id;
-			const title = runningIds.has(row.id) ? `${titleRaw} · 运行中` : titleRaw;
-			const createdAt =
-				typeof row.createdAt === "string" ? row.createdAt : nowIso();
-			const updatedAt =
-				typeof row.updatedAt === "string" ? row.updatedAt : nowIso();
+			const rawName = typeof row.name === "string" ? row.name : row.id;
+			const title = runningIds.has(row.id) ? `${rawName} · 运行中` : rawName;
+			const createdAt = typeof row.createdAt === "string" ? row.createdAt : nowIso();
+			const updatedAt = typeof row.updatedAt === "string" ? row.updatedAt : nowIso();
 			return {
 				id: row.id,
 				title,
+				messages: old?.messages ?? [],
 				createdAt,
 				updatedAt,
-				messages: old?.messages ?? [],
 			} as ChatSession;
 		})
 		.filter((item): item is ChatSession => Boolean(item));
-};
-
-const toStateMessages = ({ payload }: { payload: unknown }): ChatMessages => {
-	const data = unwrapGatewayData({ payload });
-	const record = asRecord({ value: data });
-	if (!record) return [];
-	const messagesRaw = "messages" in record ? record.messages : [];
-	const rows = asArray({ value: messagesRaw });
-	return rows
-		.map((item) => {
-			const row = asRecord({ value: item });
-			if (!row) return null;
-			const id = typeof row.id === "string" ? row.id : crypto.randomUUID();
-			const role = row.role;
-			const content = typeof row.content === "string" ? row.content : "";
-			if (
-				(role !== "user" && role !== "assistant" && role !== "system") ||
-				!content
-			)
-				return null;
-			return { id, role, parts: [{ type: "text", content }] } as ChatMessage;
-		})
-		.filter((item): item is ChatMessage => Boolean(item));
 };
 
 const requestGateway = async ({
@@ -581,4 +506,30 @@ const extractWsChatUrl = ({ payload }: { payload: unknown }): string => {
 	if (!ws) return "";
 	const chatUrl = ws.chatUrl;
 	return typeof chatUrl === "string" ? chatUrl : "";
+};
+
+const extractWsTextChunk = ({
+	payload,
+}: {
+	payload: Record<string, unknown>;
+}): string => {
+	const delta = payload.delta;
+	if (typeof delta === "string") return delta;
+	const content = payload.content;
+	if (typeof content === "string") return content;
+	return "";
+};
+
+const extractWsFinalText = ({
+	payload,
+}: {
+	payload: Record<string, unknown>;
+}): string => {
+	const full = payload.full_response;
+	if (typeof full === "string") return full;
+	const message = payload.message;
+	if (typeof message === "string") return message;
+	const content = payload.content;
+	if (typeof content === "string") return content;
+	return "";
 };
