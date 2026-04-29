@@ -7,8 +7,16 @@ datasource db {
   provider = "postgresql"
 }
 
-model Todo {
-  id        Int      @id @default(autoincrement())
-  title     String
-  createdAt DateTime @default(now())
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  baseUrl     String
+  token       String
+  description String?
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([name])
+  @@map("agents")
 }

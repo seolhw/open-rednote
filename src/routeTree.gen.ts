@@ -20,14 +20,18 @@ import { Route as DemoDbChatRouteImport } from './routes/demo/db-chat'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
 import { Route as DemoAiStructuredRouteImport } from './routes/demo/ai-structured'
 import { Route as DemoAiImageRouteImport } from './routes/demo/ai-image'
+import { Route as ApiAgentsIndexRouteImport } from './routes/api/agents/index'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
 import { Route as ApiZeroclawChatRouteImport } from './routes/api/zeroclaw/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAgentsAgentIdIndexRouteImport } from './routes/api/agents/$agentId/index'
 import { Route as DemoApiAiTtsRouteImport } from './routes/demo/api.ai.tts'
 import { Route as DemoApiAiTranscriptionRouteImport } from './routes/demo/api.ai.transcription'
 import { Route as DemoApiAiStructuredRouteImport } from './routes/demo/api.ai.structured'
 import { Route as DemoApiAiImageRouteImport } from './routes/demo/api.ai.image'
+import { Route as ApiAgentsAgentIdObserveIndexRouteImport } from './routes/api/agents/$agentId/observe/index'
+import { Route as ApiAgentsAgentIdGatewayRequestIndexRouteImport } from './routes/api/agents/$agentId/gateway/request/index'
 
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
@@ -84,6 +88,11 @@ const DemoAiImageRoute = DemoAiImageRouteImport.update({
   path: '/demo/ai-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAgentsIndexRoute = ApiAgentsIndexRouteImport.update({
+  id: '/api/agents/',
+  path: '/api/agents/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoFormSimpleRoute = DemoFormSimpleRouteImport.update({
   id: '/demo/form/simple',
   path: '/demo/form/simple',
@@ -102,6 +111,11 @@ const ApiZeroclawChatRoute = ApiZeroclawChatRouteImport.update({
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAgentsAgentIdIndexRoute = ApiAgentsAgentIdIndexRouteImport.update({
+  id: '/api/agents/$agentId/',
+  path: '/api/agents/$agentId/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoApiAiTtsRoute = DemoApiAiTtsRouteImport.update({
@@ -124,6 +138,18 @@ const DemoApiAiImageRoute = DemoApiAiImageRouteImport.update({
   path: '/demo/api/ai/image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAgentsAgentIdObserveIndexRoute =
+  ApiAgentsAgentIdObserveIndexRouteImport.update({
+    id: '/api/agents/$agentId/observe/',
+    path: '/api/agents/$agentId/observe/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAgentsAgentIdGatewayRequestIndexRoute =
+  ApiAgentsAgentIdGatewayRequestIndexRouteImport.update({
+    id: '/api/agents/$agentId/gateway/request/',
+    path: '/api/agents/$agentId/gateway/request/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -141,10 +167,14 @@ export interface FileRoutesByFullPath {
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
+  '/api/agents/': typeof ApiAgentsIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
+  '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
+  '/api/agents/$agentId/observe/': typeof ApiAgentsAgentIdObserveIndexRoute
+  '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -162,10 +192,14 @@ export interface FileRoutesByTo {
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
+  '/api/agents': typeof ApiAgentsIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
+  '/api/agents/$agentId': typeof ApiAgentsAgentIdIndexRoute
+  '/api/agents/$agentId/observe': typeof ApiAgentsAgentIdObserveIndexRoute
+  '/api/agents/$agentId/gateway/request': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -184,10 +218,14 @@ export interface FileRoutesById {
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
+  '/api/agents/': typeof ApiAgentsIndexRoute
   '/demo/api/ai/image': typeof DemoApiAiImageRoute
   '/demo/api/ai/structured': typeof DemoApiAiStructuredRoute
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
+  '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
+  '/api/agents/$agentId/observe/': typeof ApiAgentsAgentIdObserveIndexRoute
+  '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -207,10 +245,14 @@ export interface FileRouteTypes {
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
+    | '/api/agents/'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
+    | '/api/agents/$agentId/'
+    | '/api/agents/$agentId/observe/'
+    | '/api/agents/$agentId/gateway/request/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -228,10 +270,14 @@ export interface FileRouteTypes {
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
+    | '/api/agents'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
+    | '/api/agents/$agentId'
+    | '/api/agents/$agentId/observe'
+    | '/api/agents/$agentId/gateway/request'
   id:
     | '__root__'
     | '/'
@@ -249,10 +295,14 @@ export interface FileRouteTypes {
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
+    | '/api/agents/'
     | '/demo/api/ai/image'
     | '/demo/api/ai/structured'
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
+    | '/api/agents/$agentId/'
+    | '/api/agents/$agentId/observe/'
+    | '/api/agents/$agentId/gateway/request/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -271,10 +321,14 @@ export interface RootRouteChildren {
   ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
+  ApiAgentsIndexRoute: typeof ApiAgentsIndexRoute
   DemoApiAiImageRoute: typeof DemoApiAiImageRoute
   DemoApiAiStructuredRoute: typeof DemoApiAiStructuredRoute
   DemoApiAiTranscriptionRoute: typeof DemoApiAiTranscriptionRoute
   DemoApiAiTtsRoute: typeof DemoApiAiTtsRoute
+  ApiAgentsAgentIdIndexRoute: typeof ApiAgentsAgentIdIndexRoute
+  ApiAgentsAgentIdObserveIndexRoute: typeof ApiAgentsAgentIdObserveIndexRoute
+  ApiAgentsAgentIdGatewayRequestIndexRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -356,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoAiImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agents/': {
+      id: '/api/agents/'
+      path: '/api/agents'
+      fullPath: '/api/agents/'
+      preLoaderRoute: typeof ApiAgentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/form/simple': {
       id: '/demo/form/simple'
       path: '/demo/form/simple'
@@ -382,6 +443,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/agents/$agentId/': {
+      id: '/api/agents/$agentId/'
+      path: '/api/agents/$agentId'
+      fullPath: '/api/agents/$agentId/'
+      preLoaderRoute: typeof ApiAgentsAgentIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/api/ai/tts': {
@@ -412,6 +480,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiAiImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agents/$agentId/observe/': {
+      id: '/api/agents/$agentId/observe/'
+      path: '/api/agents/$agentId/observe'
+      fullPath: '/api/agents/$agentId/observe/'
+      preLoaderRoute: typeof ApiAgentsAgentIdObserveIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/agents/$agentId/gateway/request/': {
+      id: '/api/agents/$agentId/gateway/request/'
+      path: '/api/agents/$agentId/gateway/request'
+      fullPath: '/api/agents/$agentId/gateway/request/'
+      preLoaderRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -431,10 +513,15 @@ const rootRouteChildren: RootRouteChildren = {
   ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
+  ApiAgentsIndexRoute: ApiAgentsIndexRoute,
   DemoApiAiImageRoute: DemoApiAiImageRoute,
   DemoApiAiStructuredRoute: DemoApiAiStructuredRoute,
   DemoApiAiTranscriptionRoute: DemoApiAiTranscriptionRoute,
   DemoApiAiTtsRoute: DemoApiAiTtsRoute,
+  ApiAgentsAgentIdIndexRoute: ApiAgentsAgentIdIndexRoute,
+  ApiAgentsAgentIdObserveIndexRoute: ApiAgentsAgentIdObserveIndexRoute,
+  ApiAgentsAgentIdGatewayRequestIndexRoute:
+    ApiAgentsAgentIdGatewayRequestIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
