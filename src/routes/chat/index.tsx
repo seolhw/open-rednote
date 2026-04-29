@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
 	Loader2,
+	MessageSquare,
 	Mic,
 	MicOff,
+	Plus,
 	Send,
 	Square,
 	Volume2,
@@ -16,20 +18,20 @@ import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
-import type { ChatMessages } from "#/hooks/use-chat-hook";
+import type { ChatMessages, ChatSession } from "#/hooks/use-chat-hook";
 import { useChatHook } from "#/hooks/use-chat-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="flex flex-1 items-center justify-center px-4">
-			<Card className="mx-auto w-full max-w-3xl py-8 text-center">
-				<h1 className="bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">
+		<div className="flex flex-1 items-center justify-center px-6 py-8">
+			<Card className="mx-auto w-full max-w-3xl rounded-2xl border-zinc-200 py-10 text-center shadow-sm">
+				<h1 className="bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-4xl font-bold tracking-wide text-transparent sm:text-5xl">
 					小红书 AI 助手
 				</h1>
-				<p className="mx-auto w-full max-w-2xl px-6 text-base text-muted-foreground sm:text-lg">
+				<p className="mx-auto mt-4 w-full max-w-2xl px-6 text-base leading-7 text-muted-foreground sm:text-lg">
 					在这里直接进行对话式创作，快速完成选题拆解、内容润色和发布建议。
 				</p>
-				<div className="px-4">{children}</div>
+				<div className="mt-6 px-4">{children}</div>
 			</Card>
 		</div>
 	);
@@ -37,8 +39,8 @@ function InitialLayout({ children }: { children: React.ReactNode }) {
 
 function ChattingLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="sticky bottom-0 left-0 right-0 z-10 border-t border-zinc-200 bg-white/90 backdrop-blur-sm">
-			<div className="mx-auto w-full max-w-3xl px-4 py-3">{children}</div>
+		<div className="border-t border-border/60 bg-background/95 px-4 py-3">
+			<div className="mx-auto w-full max-w-3xl">{children}</div>
 		</div>
 	);
 }
@@ -82,9 +84,9 @@ function Messages({
 	return (
 		<div
 			ref={messagesContainerRef}
-			className="flex-1 overflow-y-auto pb-4 min-h-0"
+			className="min-h-0 flex-1 overflow-y-auto px-2 py-4"
 		>
-			<div className="max-w-3xl mx-auto w-full px-4">
+			<div className="mx-auto w-full max-w-3xl space-y-2 px-4">
 				{messages.map((message) => {
 					const textContent = getTextContent(message.parts);
 					const isPlaying = playingId === message.id;
@@ -92,13 +94,13 @@ function Messages({
 					return (
 						<div
 							key={message.id}
-							className={`p-4 ${
+							className={`rounded-2xl p-4 transition ${
 								message.role === "assistant"
-									? "rounded-xl border border-rose-100 bg-rose-50/60"
-									: "bg-transparent"
+									? "bg-muted/60"
+									: "bg-background"
 							}`}
 						>
-							<div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
+							<div className="mx-auto flex w-full max-w-3xl items-start gap-4">
 								<Badge
 									variant={
 										message.role === "assistant" ? "default" : "secondary"
@@ -158,7 +160,16 @@ function ChatPage() {
 		useAudioRecorder();
 	const { playingId, speak, stop: stopTTS } = useTTS();
 
-	const { messages, sendMessage, isLoading, stop } = useChatHook();
+	const {
+		sessions,
+		selectedSessionId,
+		selectSession,
+		createSession,
+		messages,
+		sendMessage,
+		isLoading,
+		stop,
+	} = useChatHook();
 
 	const handleMicClick = async () => {
 		if (isRecording) {
@@ -173,28 +184,84 @@ function ChatPage() {
 		}
 	};
 
-	const Layout = messages.length ? ChattingLayout : InitialLayout;
+	const getSessionPreview = ({ session }: { session: ChatSession }) => {
+		const last = session.messages.at(-1);
+		if (!last) {
+			return "暂无消息";
+		}
+		for (const part of last.parts) {
+			if (part.type === "text" && part.content) {
+				return part.content;
+			}
+		}
+		return "暂无消息";
+	};
 
 	return (
-		<div className="relative flex h-[500px]">
-			<div className="flex-1 flex flex-col min-h-0">
-				<Messages
-					messages={messages}
-					playingId={playingId}
-					onSpeak={speak}
-					onStopSpeak={stopTTS}
-				/>
+		<div className="mx-auto mt-6 grid h-[calc(100vh-180px)] min-h-[640px] w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
+			<Card className="overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
+				<div className="mb-3 flex items-center justify-between">
+					<p className="text-sm font-semibold">会话</p>
+					<Button
+						type="button"
+						size="sm"
+						variant="outline"
+						onClick={createSession}
+					>
+						<Plus className="h-4 w-4" />
+						新建
+					</Button>
+				</div>
+				<div className="space-y-2 overflow-y-auto pr-1">
+					{sessions.map((session) => {
+						const selected = session.id === selectedSessionId;
+						return (
+							<button
+								key={session.id}
+								type="button"
+								onClick={() => selectSession({ sessionId: session.id })}
+								className={`w-full rounded-xl border p-3 text-left transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
+							>
+								<div className="mb-1 flex items-center gap-2 text-sm font-semibold text-zinc-700">
+									<MessageSquare className="h-4 w-4 text-zinc-500" />
+									<span className="truncate">{session.title}</span>
+								</div>
+								<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
+									{getSessionPreview({ session })}
+								</p>
+							</button>
+						);
+					})}
+				</div>
+			</Card>
 
-				<Layout>
+			<Card className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/60 shadow-sm">
+				<div className="flex-1 min-h-0">
+					{messages.length ? (
+						<Messages
+							messages={messages}
+							playingId={playingId}
+							onSpeak={speak}
+							onStopSpeak={stopTTS}
+						/>
+					) : (
+						<InitialLayout>
+							<p className="text-sm text-muted-foreground">
+								选择会话后开始聊天，或新建一个会话。
+							</p>
+						</InitialLayout>
+					)}
+				</div>
+				<ChattingLayout>
 					<div className="space-y-3">
-						{isLoading && (
+						{isLoading ? (
 							<div className="flex items-center justify-center">
 								<Button type="button" variant="destructive" onClick={stop}>
 									<Square className="h-4 w-4 fill-current" />
 									Stop
 								</Button>
 							</div>
-						)}
+						) : null}
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
@@ -221,21 +288,19 @@ function ChatPage() {
 										<Mic className="h-4 w-4" />
 									)}
 								</Button>
-
 								<div className="relative flex-1">
 									<Textarea
 										value={input}
 										onChange={(e) => setInput(e.target.value)}
 										placeholder="请输入你想问 ZeroClaw 的内容..."
-										className="w-full resize-none overflow-hidden pr-12"
+										className="w-full resize-none overflow-hidden rounded-xl border-border bg-background pr-12"
 										rows={1}
 										style={{ minHeight: "44px", maxHeight: "200px" }}
 										disabled={isLoading}
 										onInput={(e) => {
 											const target = e.target as HTMLTextAreaElement;
 											target.style.height = "auto";
-											target.style.height =
-												Math.min(target.scrollHeight, 200) + "px";
+											target.style.height = `${Math.min(target.scrollHeight, 200)}px`;
 										}}
 										onKeyDown={(e) => {
 											if (e.key === "Enter" && !e.shiftKey && input.trim()) {
@@ -258,8 +323,8 @@ function ChatPage() {
 							</div>
 						</form>
 					</div>
-				</Layout>
-			</div>
+				</ChattingLayout>
+			</Card>
 		</div>
 	);
 }
