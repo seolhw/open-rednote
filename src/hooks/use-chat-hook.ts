@@ -1,4 +1,14 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import {
+	abortGatewaySession,
+	type GatewayRunningList,
+	type GatewaySessionList,
+	getEnabledAgentId,
+	getGatewayRunningSessions,
+	getGatewaySessions,
+	getWsChatUrl,
+} from "../api/chat";
 
 export type ChatPart =
 	| { type: "text"; content: string }
@@ -23,86 +33,6 @@ export type ChatSession = {
 	messages: ChatMessages;
 	createdAt: string;
 	updatedAt: string;
-};
-
-type AgentItem = {
-	id: string;
-	name: string;
-	baseUrl: string;
-	description: string | null;
-	isEnabled: boolean;
-	createdAt: string;
-	updatedAt: string;
-};
-
-type AgentListResponse = {
-	items: AgentItem[];
-};
-
-type RequestResult = {
-	ok: boolean;
-	status: number;
-	data: unknown;
-};
-
-const parseResponseData = async ({
-	response,
-}: {
-	response: Response;
-}): Promise<unknown> => {
-	const contentType = response.headers.get("content-type") ?? "";
-	const raw = await response.text();
-
-	if (!raw) {
-		return null;
-	}
-	if (contentType.includes("application/json")) {
-		return JSON.parse(raw);
-	}
-	return raw;
-};
-
-const requestJson = async ({
-	url,
-	method = "GET",
-	body,
-	signal,
-}: {
-	url: string;
-	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-	body?: unknown;
-	signal?: AbortSignal;
-}): Promise<RequestResult> => {
-	const settled = await Promise.allSettled([
-		fetch(url, {
-			method,
-			headers: { "Content-Type": "application/json" },
-			body: body === undefined ? undefined : JSON.stringify(body),
-			signal,
-		}),
-	]);
-
-	const result = settled[0];
-	if (result.status === "rejected") {
-		return {
-			ok: false,
-			status: 0,
-			data: {
-				error: "请求失败",
-				details:
-					result.reason instanceof Error
-						? result.reason.message
-						: "unknown error",
-			},
-		};
-	}
-
-	const data = await parseResponseData({ response: result.value });
-	return {
-		ok: result.value.ok,
-		status: result.value.status,
-		data,
-	};
 };
 
 const toWsPayload = ({
@@ -159,12 +89,61 @@ export const useChatHook = () => {
 	);
 	const [isLoading, setIsLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
-	const preferredAgentIdRef = useRef<string | null>(null);
 	const wsBaseChatUrlRef = useRef("");
 	const wsSocketRef = useRef<WebSocket | null>(null);
 	const activeWsSessionIdRef = useRef("");
 	const pendingSessionIdRef = useRef("");
 	const streamBufferRef = useRef("");
+
+	const queryClient = useQueryClient();
+
+	const agentIdQuery = useQuery({
+		queryKey: ["chat", "enabled-agent-id"],
+		queryFn: () => getEnabledAgentId({}),
+		staleTime: 60_000,
+	});
+
+	const sessionsQuery = useQuery({
+		queryKey: ["chat", "sessions", agentIdQuery.data],
+		enabled: Boolean(agentIdQuery.data),
+		queryFn: async () => {
+			const agentId = agentIdQuery.data;
+			if (!agentId) return { sessions: null, running: null };
+			const [sessionsResult, runningResult] = await Promise.all([
+				getGatewaySessions({ agentId }),
+				getGatewayRunningSessions({ agentId }),
+			]);
+			return {
+				sessions: sessionsResult.ok ? sessionsResult.data : null,
+				running: runningResult.ok ? runningResult.data : null,
+			};
+		},
+		refetchInterval: 10_000,
+	});
+
+	const resolveAgentId = async (): Promise<string | null> => {
+		const cached = queryClient.getQueryData<string | null>([
+			"chat",
+			"enabled-agent-id",
+		]);
+		if (cached !== undefined) return cached;
+		return queryClient.fetchQuery({
+			queryKey: ["chat", "enabled-agent-id"],
+			queryFn: () => getEnabledAgentId({}),
+			staleTime: 60_000,
+		});
+	};
+
+	const abortSessionMutation = useMutation({
+		mutationFn: async ({ sessionId }: { sessionId: string }) => {
+			const agentId = await resolveAgentId();
+			if (!agentId) return;
+			await abortGatewaySession({ agentId, sessionId });
+		},
+		onSuccess: () => {
+			void sessionsQuery.refetch();
+		},
+	});
 
 	const selectedSession =
 		sessions.find((item) => item.id === selectedSessionId) ?? sessions[0];
@@ -182,47 +161,13 @@ export const useChatHook = () => {
 		setSelectedSessionId(sessionId);
 	};
 
-	const resolveAgentId = async ({
-		signal,
-	}: {
-		signal?: AbortSignal;
-	}): Promise<string | null> => {
-		if (preferredAgentIdRef.current) return preferredAgentIdRef.current;
-		const listResult = await requestJson({
-			url: "/api/agents",
-			method: "GET",
-			signal,
-		});
-		if (!listResult.ok) return null;
-		const payload = listResult.data as AgentListResponse;
-		const target = (payload.items ?? []).find((item) => item.isEnabled);
-		if (!target) return null;
-		preferredAgentIdRef.current = target.id;
-		return target.id;
-	};
-
-	const refreshSessions = async ({ signal }: { signal?: AbortSignal }) => {
-		const agentId = await resolveAgentId({ signal });
-		if (!agentId) return;
-		const [sessionsResult, runningResult] = await Promise.all([
-			requestGateway({
-				agentId,
-				path: "/api/sessions",
-				method: "GET",
-				signal,
-			}),
-			requestGateway({
-				agentId,
-				path: "/api/sessions/running",
-				method: "GET",
-				signal,
-			}),
-		]);
-		if (!sessionsResult.ok) return;
+	useEffect(() => {
+		const sessionsPayload = sessionsQuery.data?.sessions ?? null;
+		if (!sessionsPayload) return;
 		setSessions((previous) => {
 			const merged = toChatSessions({
-				sessionsPayload: sessionsResult.data,
-				runningPayload: runningResult.ok ? runningResult.data : null,
+				sessionsPayload,
+				runningPayload: sessionsQuery.data?.running ?? null,
 				previous,
 			});
 			if (!merged.length) return previous;
@@ -233,7 +178,7 @@ export const useChatHook = () => {
 			);
 			return merged;
 		});
-	};
+	}, [sessionsQuery.data]);
 
 	const sendMessage = async (input: string) => {
 		const content = input.trim();
@@ -290,21 +235,12 @@ export const useChatHook = () => {
 			abortRef.current = null;
 		}
 		if (selectedSessionId) {
-			void (async () => {
-				const agentId = await resolveAgentId({});
-				if (!agentId) return;
-				await requestGateway({
-					agentId,
-					path: `/api/sessions/${encodeURIComponent(selectedSessionId)}/abort`,
-					method: "POST",
-				});
-			})();
+			void abortSessionMutation.mutateAsync({ sessionId: selectedSessionId });
 		}
 		setIsLoading(false);
 	};
 
 	useEffect(() => {
-		void refreshSessions({});
 		return () => {
 			if (wsSocketRef.current) {
 				wsSocketRef.current.close();
@@ -331,17 +267,14 @@ export const useChatHook = () => {
 		sessionId: string;
 		sessionName: string;
 	}): Promise<WebSocket | null> {
-		const agentId = await resolveAgentId({});
+		const agentId = await resolveAgentId();
 		if (!agentId) return null;
 		if (!wsBaseChatUrlRef.current) {
-			const wsInfoResult = await requestGateway({
-				agentId,
-				path: "/health",
-				method: "GET",
+			const wsChatUrl = await queryClient.fetchQuery({
+				queryKey: ["chat", "ws-chat-url", agentId],
+				queryFn: () => getWsChatUrl({ agentId }),
+				staleTime: 60_000,
 			});
-			if (!wsInfoResult.ok) return null;
-			// @ts-expect-error
-			const wsChatUrl = wsInfoResult.data.ws.chatUrl;
 			if (!wsChatUrl) return null;
 			wsBaseChatUrlRef.current = wsChatUrl;
 		}
@@ -409,98 +342,31 @@ export const useChatHook = () => {
 	}
 };
 
-type RecordValue = Record<string, unknown>;
-
-const asRecord = ({ value }: { value: unknown }): RecordValue | null =>
-	typeof value === "object" && value !== null ? (value as RecordValue) : null;
-
-const asArray = ({ value }: { value: unknown }): unknown[] =>
-	Array.isArray(value) ? value : [];
-
-const unwrapGatewayData = ({ payload }: { payload: unknown }): unknown => {
-	const record = asRecord({ value: payload });
-	if (!record) return payload;
-	return "data" in record ? record.data : payload;
-};
-
-const toIdList = ({ payload }: { payload: unknown }): string[] => {
-	const data = unwrapGatewayData({ payload });
-	const root = asRecord({ value: data });
-	const rows =
-		root && Array.isArray(root.items) ? root.items : asArray({ value: data });
-	return rows
-		.map((item) => {
-			const row = asRecord({ value: item });
-			if (!row) return "";
-			const id = row.id;
-			return typeof id === "string" ? id : "";
-		})
-		.filter((item) => item.length > 0);
-};
-
 const toChatSessions = ({
 	sessionsPayload,
 	runningPayload,
 	previous,
 }: {
-	sessionsPayload: unknown;
-	runningPayload: unknown;
+	sessionsPayload: GatewaySessionList | null;
+	runningPayload: GatewayRunningList | null;
 	previous: ChatSession[];
 }): ChatSession[] => {
-	const runningIds = new Set(toIdList({ payload: runningPayload }));
-	const data = unwrapGatewayData({ payload: sessionsPayload });
-	const root = asRecord({ value: data });
-	const rows =
-		root && Array.isArray(root.items) ? root.items : asArray({ value: data });
-	return rows
-		.map((item) => {
-			const row = asRecord({ value: item });
-			if (!row || typeof row.id !== "string") return null;
-			const old = previous.find((p) => p.id === row.id);
-			const rawName = typeof row.name === "string" ? row.name : row.id;
-			const title = runningIds.has(row.id) ? `${rawName} · 运行中` : rawName;
-			const createdAt =
-				typeof row.createdAt === "string" ? row.createdAt : nowIso();
-			const updatedAt =
-				typeof row.updatedAt === "string" ? row.updatedAt : nowIso();
-			return {
-				id: row.id,
-				title,
-				messages: old?.messages ?? [],
-				createdAt,
-				updatedAt,
-			} as ChatSession;
-		})
-		.filter((item): item is ChatSession => Boolean(item));
-};
-
-const requestGateway = async ({
-	agentId,
-	path,
-	method,
-	body,
-	query,
-	signal,
-}: {
-	agentId: string;
-	path: string;
-	method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-	body?: unknown;
-	query?: Record<string, string>;
-	signal?: AbortSignal;
-}): Promise<RequestResult> =>
-	requestJson({
-		url: `/api/agents/${agentId}/gateway/request`,
-		method: "POST",
-		body: {
-			method,
-			path,
-			query,
-			body,
-			contentType: "application/json",
-		},
-		signal,
+	if (!sessionsPayload) return [];
+	const runningIds = new Set(
+		(runningPayload?.items ?? []).map((item) => item.id),
+	);
+	return sessionsPayload.items.map((row) => {
+		const old = previous.find((p) => p.id === row.id);
+		const title = runningIds.has(row.id) ? `${row.name} · 运行中` : row.name;
+		return {
+			id: row.id,
+			title,
+			messages: old?.messages ?? [],
+			createdAt: row.createdAt,
+			updatedAt: row.updatedAt,
+		};
 	});
+};
 
 const extractWsTextChunk = ({
 	payload,
