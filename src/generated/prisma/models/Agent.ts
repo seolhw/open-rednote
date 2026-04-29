@@ -27,6 +27,7 @@ export type AggregateAgent = {
 export type AgentMinAggregateOutputType = {
   id: string | null
   name: string | null
+  runtimeType: string | null
   baseUrl: string | null
   token: string | null
   description: string | null
@@ -38,6 +39,7 @@ export type AgentMinAggregateOutputType = {
 export type AgentMaxAggregateOutputType = {
   id: string | null
   name: string | null
+  runtimeType: string | null
   baseUrl: string | null
   token: string | null
   description: string | null
@@ -49,6 +51,7 @@ export type AgentMaxAggregateOutputType = {
 export type AgentCountAggregateOutputType = {
   id: number
   name: number
+  runtimeType: number
   baseUrl: number
   token: number
   description: number
@@ -62,6 +65,7 @@ export type AgentCountAggregateOutputType = {
 export type AgentMinAggregateInputType = {
   id?: true
   name?: true
+  runtimeType?: true
   baseUrl?: true
   token?: true
   description?: true
@@ -73,6 +77,7 @@ export type AgentMinAggregateInputType = {
 export type AgentMaxAggregateInputType = {
   id?: true
   name?: true
+  runtimeType?: true
   baseUrl?: true
   token?: true
   description?: true
@@ -84,6 +89,7 @@ export type AgentMaxAggregateInputType = {
 export type AgentCountAggregateInputType = {
   id?: true
   name?: true
+  runtimeType?: true
   baseUrl?: true
   token?: true
   description?: true
@@ -168,6 +174,7 @@ export type AgentGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type AgentGroupByOutputType = {
   id: string
   name: string
+  runtimeType: string
   baseUrl: string
   token: string
   description: string | null
@@ -200,6 +207,7 @@ export type AgentWhereInput = {
   NOT?: Prisma.AgentWhereInput | Prisma.AgentWhereInput[]
   id?: Prisma.StringFilter<"Agent"> | string
   name?: Prisma.StringFilter<"Agent"> | string
+  runtimeType?: Prisma.StringFilter<"Agent"> | string
   baseUrl?: Prisma.StringFilter<"Agent"> | string
   token?: Prisma.StringFilter<"Agent"> | string
   description?: Prisma.StringNullableFilter<"Agent"> | string | null
@@ -211,6 +219,7 @@ export type AgentWhereInput = {
 export type AgentOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  runtimeType?: Prisma.SortOrder
   baseUrl?: Prisma.SortOrder
   token?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -225,6 +234,7 @@ export type AgentWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AgentWhereInput | Prisma.AgentWhereInput[]
   OR?: Prisma.AgentWhereInput[]
   NOT?: Prisma.AgentWhereInput | Prisma.AgentWhereInput[]
+  runtimeType?: Prisma.StringFilter<"Agent"> | string
   baseUrl?: Prisma.StringFilter<"Agent"> | string
   token?: Prisma.StringFilter<"Agent"> | string
   description?: Prisma.StringNullableFilter<"Agent"> | string | null
@@ -236,6 +246,7 @@ export type AgentWhereUniqueInput = Prisma.AtLeast<{
 export type AgentOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  runtimeType?: Prisma.SortOrder
   baseUrl?: Prisma.SortOrder
   token?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -253,6 +264,7 @@ export type AgentScalarWhereWithAggregatesInput = {
   NOT?: Prisma.AgentScalarWhereWithAggregatesInput | Prisma.AgentScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   name?: Prisma.StringWithAggregatesFilter<"Agent"> | string
+  runtimeType?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   baseUrl?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   token?: Prisma.StringWithAggregatesFilter<"Agent"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Agent"> | string | null
@@ -264,6 +276,7 @@ export type AgentScalarWhereWithAggregatesInput = {
 export type AgentCreateInput = {
   id?: string
   name: string
+  runtimeType?: string
   baseUrl: string
   token: string
   description?: string | null
@@ -275,6 +288,7 @@ export type AgentCreateInput = {
 export type AgentUncheckedCreateInput = {
   id?: string
   name: string
+  runtimeType?: string
   baseUrl: string
   token: string
   description?: string | null
@@ -286,6 +300,7 @@ export type AgentUncheckedCreateInput = {
 export type AgentUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  runtimeType?: Prisma.StringFieldUpdateOperationsInput | string
   baseUrl?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -297,6 +312,7 @@ export type AgentUpdateInput = {
 export type AgentUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  runtimeType?: Prisma.StringFieldUpdateOperationsInput | string
   baseUrl?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -308,6 +324,7 @@ export type AgentUncheckedUpdateInput = {
 export type AgentCreateManyInput = {
   id?: string
   name: string
+  runtimeType?: string
   baseUrl: string
   token: string
   description?: string | null
@@ -319,6 +336,7 @@ export type AgentCreateManyInput = {
 export type AgentUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  runtimeType?: Prisma.StringFieldUpdateOperationsInput | string
   baseUrl?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -330,6 +348,7 @@ export type AgentUpdateManyMutationInput = {
 export type AgentUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  runtimeType?: Prisma.StringFieldUpdateOperationsInput | string
   baseUrl?: Prisma.StringFieldUpdateOperationsInput | string
   token?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -341,6 +360,7 @@ export type AgentUncheckedUpdateManyInput = {
 export type AgentCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  runtimeType?: Prisma.SortOrder
   baseUrl?: Prisma.SortOrder
   token?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -352,6 +372,7 @@ export type AgentCountOrderByAggregateInput = {
 export type AgentMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  runtimeType?: Prisma.SortOrder
   baseUrl?: Prisma.SortOrder
   token?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -363,12 +384,17 @@ export type AgentMaxOrderByAggregateInput = {
 export type AgentMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  runtimeType?: Prisma.SortOrder
   baseUrl?: Prisma.SortOrder
   token?: Prisma.SortOrder
   description?: Prisma.SortOrder
   isEnabled?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
@@ -379,11 +405,16 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
 
 
 export type AgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  runtimeType?: boolean
   baseUrl?: boolean
   token?: boolean
   description?: boolean
@@ -395,6 +426,7 @@ export type AgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type AgentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  runtimeType?: boolean
   baseUrl?: boolean
   token?: boolean
   description?: boolean
@@ -406,6 +438,7 @@ export type AgentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type AgentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
+  runtimeType?: boolean
   baseUrl?: boolean
   token?: boolean
   description?: boolean
@@ -417,6 +450,7 @@ export type AgentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type AgentSelectScalar = {
   id?: boolean
   name?: boolean
+  runtimeType?: boolean
   baseUrl?: boolean
   token?: boolean
   description?: boolean
@@ -425,7 +459,7 @@ export type AgentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "baseUrl" | "token" | "description" | "isEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["agent"]>
+export type AgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "runtimeType" | "baseUrl" | "token" | "description" | "isEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["agent"]>
 
 export type $AgentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Agent"
@@ -433,6 +467,7 @@ export type $AgentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
+    runtimeType: string
     baseUrl: string
     token: string
     description: string | null
@@ -864,6 +899,7 @@ export interface Prisma__AgentClient<T, Null = never, ExtArgs extends runtime.Ty
 export interface AgentFieldRefs {
   readonly id: Prisma.FieldRef<"Agent", 'String'>
   readonly name: Prisma.FieldRef<"Agent", 'String'>
+  readonly runtimeType: Prisma.FieldRef<"Agent", 'String'>
   readonly baseUrl: Prisma.FieldRef<"Agent", 'String'>
   readonly token: Prisma.FieldRef<"Agent", 'String'>
   readonly description: Prisma.FieldRef<"Agent", 'String'>

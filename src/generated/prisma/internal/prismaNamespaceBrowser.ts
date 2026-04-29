@@ -51,7 +51,6 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Todo: 'Todo',
   Agent: 'Agent'
 } as const
 
@@ -71,18 +70,10 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const TodoScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  createdAt: 'createdAt'
-} as const
-
-export type TodoScalarFieldEnum = (typeof TodoScalarFieldEnum)[keyof typeof TodoScalarFieldEnum]
-
-
 export const AgentScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  runtimeType: 'runtimeType',
   baseUrl: 'baseUrl',
   token: 'token',
   description: 'description',

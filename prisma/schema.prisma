@@ -10,6 +10,7 @@ datasource db {
 model Agent {
   id          String   @id @default(cuid())
   name        String
+  runtimeType String   @default("zeroclaw")
   baseUrl     String
   token       String
   description String?

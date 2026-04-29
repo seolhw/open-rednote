@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentsIndexRouteImport } from './routes/agents/index'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoStoreRouteImport } from './routes/demo/store'
 import { Route as DemoPrismaRouteImport } from './routes/demo/prisma'
@@ -46,6 +47,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentsIndexRoute = AgentsIndexRouteImport.update({
+  id: '/agents/',
+  path: '/agents/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoTableRoute = DemoTableRouteImport.update({
@@ -163,6 +169,7 @@ export interface FileRoutesByFullPath {
   '/demo/prisma': typeof DemoPrismaRoute
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
+  '/agents/': typeof AgentsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -188,6 +195,7 @@ export interface FileRoutesByTo {
   '/demo/prisma': typeof DemoPrismaRoute
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
+  '/agents': typeof AgentsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -214,6 +222,7 @@ export interface FileRoutesById {
   '/demo/prisma': typeof DemoPrismaRoute
   '/demo/store': typeof DemoStoreRoute
   '/demo/table': typeof DemoTableRoute
+  '/agents/': typeof AgentsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/demo/prisma'
     | '/demo/store'
     | '/demo/table'
+    | '/agents/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/demo/prisma'
     | '/demo/store'
     | '/demo/table'
+    | '/agents'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/demo/prisma'
     | '/demo/store'
     | '/demo/table'
+    | '/agents/'
     | '/api/auth/$'
     | '/api/zeroclaw/chat'
     | '/demo/form/address'
@@ -317,6 +329,7 @@ export interface RootRouteChildren {
   DemoPrismaRoute: typeof DemoPrismaRoute
   DemoStoreRoute: typeof DemoStoreRoute
   DemoTableRoute: typeof DemoTableRoute
+  AgentsIndexRoute: typeof AgentsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agents/': {
+      id: '/agents/'
+      path: '/agents'
+      fullPath: '/agents/'
+      preLoaderRoute: typeof AgentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/table': {
@@ -509,6 +529,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoPrismaRoute: DemoPrismaRoute,
   DemoStoreRoute: DemoStoreRoute,
   DemoTableRoute: DemoTableRoute,
+  AgentsIndexRoute: AgentsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,

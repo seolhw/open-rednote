@@ -8,6 +8,5 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Todo.ts'
 export type * from './models/Agent.ts'
 export type * from './commonInputTypes.ts'

@@ -26,6 +26,16 @@ export default function Header() {
 						工作台
 					</Link>
 					<Link
+						to="/agents"
+						className="text-sm font-semibold text-zinc-600 no-underline transition hover:text-rose-600"
+						activeProps={{
+							className:
+								"text-sm font-semibold text-rose-600 underline decoration-rose-500 decoration-2 underline-offset-8",
+						}}
+					>
+						Agent 管理
+					</Link>
+					<Link
 						to="/about"
 						className="text-sm font-semibold text-zinc-600 no-underline transition hover:text-rose-600"
 						activeProps={{
