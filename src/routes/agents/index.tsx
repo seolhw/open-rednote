@@ -494,6 +494,263 @@ function AgentsPage() {
 	);
 }
 
+void AgentsPage;
+
+type AgentCardStatus = { ok: boolean; text: string; updatedAt: number };
+
+function AgentsCardListPage() {
+	const [items, setItems] = useState<AgentItem[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [createOpen, setCreateOpen] = useState(false);
+	const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
+	const [message, setMessage] = useState("");
+	const [createForm, setCreateForm] = useState(emptyCreateForm);
+	const [statusById, setStatusById] = useState<Record<string, AgentCardStatus>>(
+		{},
+	);
+
+	const loadAgents = useCallback(async () => {
+		setLoading(true);
+		const result = await requestJson({ url: "/api/agents" });
+		if (!result.ok) {
+			setLoading(false);
+			setMessage("加载 Agent 列表失败");
+			return;
+		}
+		const payload = result.data as AgentListResponse;
+		setItems(payload.items ?? []);
+		setLoading(false);
+	}, []);
+
+	const refreshOneStatus = useCallback(async ({ id }: { id: string }) => {
+		const result = await requestJson({ url: `/api/agents/${id}/observe` });
+		if (!result.ok) {
+			setStatusById((p) => ({
+				...p,
+				[id]: {
+					ok: false,
+					text: `观测失败(${result.status})`,
+					updatedAt: Date.now(),
+				},
+			}));
+			return;
+		}
+		const payload = result.data as AgentObserveResponse;
+		const ok = payload.probes.health.ok && payload.probes.apiHealth.ok;
+		const text = `health ${payload.probes.health.status} / api ${payload.probes.apiHealth.status}`;
+		setStatusById((p) => ({ ...p, [id]: { ok, text, updatedAt: Date.now() } }));
+	}, []);
+
+	const refreshAllStatus = useCallback(
+		async ({ agents }: { agents: AgentItem[] }) => {
+			setIsRefreshingStatus(true);
+			await Promise.all(
+				agents.map((agent) => refreshOneStatus({ id: agent.id })),
+			);
+			setIsRefreshingStatus(false);
+		},
+		[refreshOneStatus],
+	);
+
+	useEffect(() => {
+		void loadAgents();
+	}, [loadAgents]);
+	useEffect(() => {
+		if (items.length) void refreshAllStatus({ agents: items });
+	}, [items, refreshAllStatus]);
+
+	const handleCreate = async () => {
+		const result = await requestJson({
+			url: "/api/agents",
+			method: "POST",
+			body: {
+				name: createForm.name.trim(),
+				baseUrl: createForm.baseUrl.trim(),
+				token: createForm.token.trim(),
+				description: createForm.description.trim() || undefined,
+				isEnabled: true,
+			},
+		});
+		if (!result.ok) {
+			setMessage("创建 Agent 失败");
+			return;
+		}
+		setCreateForm(emptyCreateForm);
+		setCreateOpen(false);
+		setMessage("创建成功");
+		await loadAgents();
+	};
+
+	const handleToggleEnabled = async ({
+		id,
+		nextEnabled,
+	}: {
+		id: string;
+		nextEnabled: boolean;
+	}) => {
+		const result = await requestJson({
+			url: `/api/agents/${id}`,
+			method: "PATCH",
+			body: { isEnabled: nextEnabled },
+		});
+		if (!result.ok) {
+			setMessage("更新启用状态失败");
+			return;
+		}
+		setMessage("状态已更新");
+		await loadAgents();
+	};
+
+	const handleDelete = async ({ id }: { id: string }) => {
+		const result = await requestJson({
+			url: `/api/agents/${id}`,
+			method: "DELETE",
+		});
+		if (!result.ok) {
+			setMessage("删除失败");
+			return;
+		}
+		setMessage("已删除");
+		await loadAgents();
+	};
+
+	return (
+		<main className="mx-auto w-full max-w-[1160px] px-4 pb-14 pt-8 sm:pt-10">
+			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+				<h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">
+					Agent 管理
+				</h1>
+				<p className="mt-2 text-sm text-zinc-600">
+					Agent 卡片列表，自动观测状态。
+				</p>
+				{message ? (
+					<p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
+						{message}
+					</p>
+				) : null}
+				<div className="mt-4 flex gap-2">
+					<Button onClick={() => setCreateOpen(true)}>创建 Agent</Button>
+					<Button
+						variant="outline"
+						onClick={() => refreshAllStatus({ agents: items })}
+						disabled={loading || isRefreshingStatus}
+					>
+						{isRefreshingStatus ? "刷新中..." : "刷新状态"}
+					</Button>
+				</div>
+			</section>
+			<section className="mt-4 grid gap-3">
+				{items.map((agent) => (
+					<article
+						key={agent.id}
+						className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+					>
+						<div className="flex items-start justify-between gap-3">
+							<div>
+								<h3 className="text-sm font-semibold text-zinc-900">
+									{agent.name}
+								</h3>
+								<p className="text-xs text-zinc-500">{agent.baseUrl}</p>
+								<p className="mt-1 text-xs text-zinc-500">
+									{agent.description || "暂无描述"}
+								</p>
+								<p className="mt-1 text-xs text-zinc-500">
+									运行状态：{statusById[agent.id]?.text ?? "未观测"}
+								</p>
+							</div>
+							<span
+								className={`rounded-full px-2 py-1 text-xs ${agent.isEnabled ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-600"}`}
+							>
+								{agent.isEnabled ? "启用中" : "已禁用"}
+							</span>
+						</div>
+						<div className="mt-3 flex gap-2">
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={() =>
+									handleToggleEnabled({
+										id: agent.id,
+										nextEnabled: !agent.isEnabled,
+									})
+								}
+							>
+								{agent.isEnabled ? "禁用" : "启用"}
+							</Button>
+							<Button
+								size="sm"
+								variant="destructive"
+								onClick={() => handleDelete({ id: agent.id })}
+							>
+								删除
+							</Button>
+						</div>
+					</article>
+				))}
+				{!items.length && !loading ? (
+					<p className="text-sm text-zinc-500">暂无 Agent，请点击上方创建。</p>
+				) : null}
+			</section>
+			{createOpen ? (
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+					onClick={() => setCreateOpen(false)}
+				>
+					<div
+						className="pointer-events-auto w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl"
+						onClick={(event) => event.stopPropagation()}
+					>
+						<h2 className="text-lg font-semibold text-zinc-900">创建 Agent</h2>
+						<div className="mt-4 grid gap-2">
+							<Label htmlFor="name">名称</Label>
+							<Input
+								id="name"
+								value={createForm.name}
+								onChange={(e) =>
+									setCreateForm((p) => ({ ...p, name: e.target.value }))
+								}
+							/>
+							<Label htmlFor="baseUrl">Gateway Base URL</Label>
+							<Input
+								id="baseUrl"
+								placeholder="http://127.0.0.1:42617"
+								value={createForm.baseUrl}
+								onChange={(e) =>
+									setCreateForm((p) => ({ ...p, baseUrl: e.target.value }))
+								}
+							/>
+							<Label htmlFor="token">Token</Label>
+							<Input
+								id="token"
+								type="password"
+								value={createForm.token}
+								onChange={(e) =>
+									setCreateForm((p) => ({ ...p, token: e.target.value }))
+								}
+							/>
+							<Label htmlFor="description">描述</Label>
+							<Textarea
+								id="description"
+								rows={3}
+								value={createForm.description}
+								onChange={(e) =>
+									setCreateForm((p) => ({ ...p, description: e.target.value }))
+								}
+							/>
+							<div className="mt-2 flex justify-end gap-2">
+								<Button variant="outline" onClick={() => setCreateOpen(false)}>
+									取消
+								</Button>
+								<Button onClick={handleCreate}>创建</Button>
+							</div>
+						</div>
+					</div>
+				</div>
+			) : null}
+		</main>
+	);
+}
+
 export const Route = createFileRoute("/agents/")({
-	component: AgentsPage,
+	component: AgentsCardListPage,
 });

@@ -6,9 +6,9 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import StoreDevtools from "../lib/demo-store-devtools";
 import appCss from "../styles.css?url";
@@ -51,11 +51,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<script src="/theme-init.js" />
 				<HeadContent />
 			</head>
-			<body
-				className="flex min-h-screen flex-col justify-between font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(255,36,66,0.22)]"
-			>
+
+			<body className="flex min-h-screen flex-col justify-between font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(255,36,66,0.22)]">
 				<Header />
-				<main className="flex-1">{children}</main>
+				<main className="flex-1">
+					<TooltipProvider>{children}</TooltipProvider>
+				</main>
 				<Footer />
 				{/* <TanStackDevtools
 					config={{
