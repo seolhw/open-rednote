@@ -58,7 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<TooltipProvider>{children}</TooltipProvider>
 				</main>
 				<Footer />
-				{/* <TanStackDevtools
+				<TanStackDevtools
 					config={{
 						position: "bottom-right",
 					}}
@@ -70,7 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						StoreDevtools,
 						TanStackQueryDevtools,
 					]}
-				/> */}
+				/>
 				<Scripts />
 			</body>
 		</html>
