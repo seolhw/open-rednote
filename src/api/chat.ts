@@ -1,6 +1,6 @@
-import { type HttpMethod, type RequestResult, request } from "./request";
+import { type HttpMethod, request } from "./request";
 
-export type AgentItem = {
+export interface AgentItem {
 	id: string;
 	name: string;
 	baseUrl: string;
@@ -8,22 +8,58 @@ export type AgentItem = {
 	isEnabled: boolean;
 	createdAt: string;
 	updatedAt: string;
-};
+}
 
-export type ApiEnvelope<TData> = { data: TData };
+export interface AgentListData {
+	items: AgentItem[];
+}
 
-export type AgentListData = { items: AgentItem[] };
+interface SessionIdItem {
+	id: string;
+}
 
-export type GatewaySessionItem = {
+export interface GatewaySessionItem {
 	id: string;
 	name: string;
 	createdAt: string;
 	updatedAt: string;
-};
+}
 
-export type GatewaySessionList = { items: GatewaySessionItem[] };
-export type GatewayRunningList = { items: { id: string }[] };
-export type GatewayHealth = { ws: { chatUrl: string } };
+export interface GatewaySessionList {
+	sessions: GatewaySessionItem[];
+}
+
+export interface GatewayRunningList {
+	sessions: SessionIdItem[];
+}
+
+interface WsConfig {
+	chatUrl: string;
+}
+
+export interface GatewayHealth {
+	ws: WsConfig;
+}
+
+interface WithSignal {
+	signal?: AbortSignal;
+}
+
+interface WithAgentId extends WithSignal {
+	agentId: string;
+}
+
+interface GatewayRequestParams extends WithAgentId {
+	path: string;
+	method: HttpMethod;
+	body?: unknown;
+	query?: Record<string, string>;
+}
+
+interface AbortGatewaySessionParams {
+	agentId: string;
+	sessionId: string;
+}
 
 const requestGateway = async <TData>({
 	agentId,
@@ -32,15 +68,8 @@ const requestGateway = async <TData>({
 	body,
 	query,
 	signal,
-}: {
-	agentId: string;
-	path: string;
-	method: HttpMethod;
-	body?: unknown;
-	query?: Record<string, string>;
-	signal?: AbortSignal;
-}): Promise<RequestResult<ApiEnvelope<TData>>> =>
-	request<ApiEnvelope<TData>>({
+}: GatewayRequestParams): Promise<TData | null> =>
+	request<TData>({
 		url: `/api/agents/${agentId}/gateway/request`,
 		method: "POST",
 		body: {
@@ -55,76 +84,63 @@ const requestGateway = async <TData>({
 
 export const getEnabledAgentId = async ({
 	signal,
-}: {
-	signal?: AbortSignal;
-}): Promise<string | null> => {
-	const result = await request<ApiEnvelope<AgentListData>>({
+}: WithSignal): Promise<string | null> => {
+	const result = await request<AgentListData>({
 		url: "/api/agents",
 		method: "GET",
 		signal,
 	});
-	if (!result.ok || !result.data) return null;
-	const target = result.data.data.items.find((item) => item.isEnabled);
+	if (!result) return null;
+	const target = result.items.find((item) => item.isEnabled);
 	return target?.id ?? null;
 };
 
 export const getGatewaySessions = async ({
 	agentId,
 	signal,
-}: {
-	agentId: string;
-	signal?: AbortSignal;
-}): Promise<RequestResult<GatewaySessionList>> => {
+}: WithAgentId): Promise<GatewaySessionList | null> => {
 	const result = await requestGateway<GatewaySessionList>({
 		agentId,
 		path: "/api/sessions",
 		method: "GET",
 		signal,
 	});
-	return { ...result, data: result.data?.data ?? null };
+	return result;
 };
 
 export const getGatewayRunningSessions = async ({
 	agentId,
 	signal,
-}: {
-	agentId: string;
-	signal?: AbortSignal;
-}): Promise<RequestResult<GatewayRunningList>> => {
+}: WithAgentId): Promise<GatewayRunningList | null> => {
 	const result = await requestGateway<GatewayRunningList>({
 		agentId,
 		path: "/api/sessions/running",
 		method: "GET",
 		signal,
 	});
-	return { ...result, data: result.data?.data ?? null };
+	return result;
 };
 
 export const abortGatewaySession = async ({
 	agentId,
 	sessionId,
-}: {
-	agentId: string;
-	sessionId: string;
-}): Promise<RequestResult<null>> => {
+}: AbortGatewaySessionParams): Promise<null> => {
 	const result = await requestGateway<null>({
 		agentId,
 		path: `/api/sessions/${encodeURIComponent(sessionId)}/abort`,
 		method: "POST",
 	});
-	return { ...result, data: null };
+	return result;
 };
 
 export const getWsChatUrl = async ({
 	agentId,
-}: {
-	agentId: string;
-}): Promise<string | null> => {
+}: Pick<WithAgentId, "agentId">): Promise<string | null> => {
 	const result = await requestGateway<GatewayHealth>({
 		agentId,
 		path: "/health",
 		method: "GET",
 	});
-	if (!result.ok || !result.data) return null;
-	return result.data.data.ws.chatUrl;
+	if (!result) return null;
+	return result.ws.chatUrl;
 };

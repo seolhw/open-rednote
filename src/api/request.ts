@@ -1,12 +1,5 @@
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-export type RequestResult<TData> = {
-	ok: boolean;
-	status: number;
-	message: string;
-	data: TData | null;
-};
-
 const parseResponseData = async ({
 	response,
 }: {
@@ -31,7 +24,7 @@ export const request = async <TData>({
 	method?: HttpMethod;
 	body?: unknown;
 	signal?: AbortSignal;
-}): Promise<RequestResult<TData>> => {
+}): Promise<TData | null> => {
 	const response = await fetch(url, {
 		method,
 		headers: { "Content-Type": "application/json" },
@@ -39,10 +32,5 @@ export const request = async <TData>({
 		signal,
 	});
 	const data = (await parseResponseData({ response })) as TData | null;
-	return {
-		ok: response.ok,
-		status: response.status,
-		message: response.statusText,
-		data,
-	};
+	return data;
 };

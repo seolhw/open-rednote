@@ -88,7 +88,6 @@ export const useChatHook = () => {
 		initialLocalSession.id,
 	);
 	const [isLoading, setIsLoading] = useState(false);
-	const abortRef = useRef<AbortController | null>(null);
 	const wsBaseChatUrlRef = useRef("");
 	const wsSocketRef = useRef<WebSocket | null>(null);
 	const activeWsSessionIdRef = useRef("");
@@ -114,8 +113,8 @@ export const useChatHook = () => {
 				getGatewayRunningSessions({ agentId }),
 			]);
 			return {
-				sessions: sessionsResult.ok ? sessionsResult.data : null,
-				running: runningResult.ok ? runningResult.data : null,
+				sessions: sessionsResult,
+				running: runningResult,
 			};
 		},
 		refetchInterval: 10_000,
@@ -230,10 +229,6 @@ export const useChatHook = () => {
 	};
 
 	const stop = () => {
-		if (abortRef.current) {
-			abortRef.current.abort();
-			abortRef.current = null;
-		}
 		if (selectedSessionId) {
 			void abortSessionMutation.mutateAsync({ sessionId: selectedSessionId });
 		}
@@ -353,9 +348,9 @@ const toChatSessions = ({
 }): ChatSession[] => {
 	if (!sessionsPayload) return [];
 	const runningIds = new Set(
-		(runningPayload?.items ?? []).map((item) => item.id),
+		(runningPayload?.sessions ?? []).map((item) => item.id),
 	);
-	return sessionsPayload.items.map((row) => {
+	return sessionsPayload.sessions.map((row) => {
 		const old = previous.find((p) => p.id === row.id);
 		const title = runningIds.has(row.id) ? `${row.name} · 运行中` : row.name;
 		return {

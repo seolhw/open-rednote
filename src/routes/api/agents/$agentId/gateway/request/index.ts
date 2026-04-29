@@ -143,23 +143,23 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 				return jsonResponse({
 					status: response.status,
 					data: {
-						ok: response.ok,
-						status: response.status,
-						contentType: responseContentType,
-						targetUrl,
-						endpoint: {
-							key: endpointResolved.key,
-							path: endpointResolved.path,
-							method: endpointResolved.method,
-						},
-						ws: {
-							chatPath: ZEROCLAW_WS_CHAT_PATH,
-							chatUrl: buildWsChatUrl({
-								baseUrl: agent.baseUrl,
-								token: agent.token,
-							}),
-						},
-						data,
+						// ok: response.ok,
+						// status: response.status,
+						// contentType: responseContentType,
+						// targetUrl,
+						// endpoint: {
+						// 	key: endpointResolved.key,
+						// 	path: endpointResolved.path,
+						// 	method: endpointResolved.method,
+						// },
+						// ws: {
+						// 	chatPath: ZEROCLAW_WS_CHAT_PATH,
+						// 	chatUrl: buildWsChatUrl({
+						// 		baseUrl: agent.baseUrl,
+						// 		token: agent.token,
+						// 	}),
+						// },
+						...data,
 					},
 				});
 			},
