@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { Button } from "#/components/ui/button";
 import { authClient } from "#/lib/auth-client";
 
 export const Route = createFileRoute("/profile/")({
@@ -121,22 +122,18 @@ function ProfilePage() {
 					) : null}
 
 					<div className="flex items-center gap-3">
-						<button
-							type="submit"
-							disabled={submitting}
-							className="h-10 rounded-md bg-black px-4 text-sm text-white disabled:opacity-50"
-						>
+						<Button type="submit" disabled={submitting}>
 							{submitting ? "保存中..." : "保存资料"}
-						</button>
-						<button
+						</Button>
+						<Button
 							type="button"
+							variant="outline"
 							onClick={() => {
 								void authClient.signOut();
 							}}
-							className="h-10 rounded-md border px-4 text-sm"
 						>
 							退出登录
-						</button>
+						</Button>
 					</div>
 				</form>
 			</div>
