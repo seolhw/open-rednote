@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
@@ -615,56 +618,41 @@ function AgentsCardListPage() {
 	};
 
 	return (
-		<main className="mx-auto w-full max-w-[1160px] px-4 pb-14 pt-8 sm:pt-10">
-			<section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-				<h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">
-					Agent 管理
-				</h1>
-				<p className="mt-2 text-sm text-zinc-600">
-					Agent 卡片列表，自动观测状态。
-				</p>
-				{message ? (
-					<p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
-						{message}
-					</p>
-				) : null}
-				<div className="mt-4 flex gap-2">
-					<Button onClick={() => setCreateOpen(true)}>创建 Agent</Button>
-					<Button
-						variant="outline"
-						onClick={() => refreshAllStatus({ agents: items })}
-						disabled={loading || isRefreshingStatus}
-					>
-						{isRefreshingStatus ? "刷新中..." : "刷新状态"}
-					</Button>
-				</div>
-			</section>
-			<section className="mt-4 grid gap-3">
+		<main className="mx-auto w-full max-w-[1160px] space-y-4 px-4 pb-14 pt-8 sm:pt-10">
+			<Card>
+				<CardHeader>
+					<CardTitle>Agent 管理</CardTitle>
+					<CardDescription>Agent 卡片列表，自动观测状态。</CardDescription>
+				</CardHeader>
+				<CardContent className="space-y-3">
+					{message ? <Badge variant="secondary">{message}</Badge> : null}
+					<div className="flex gap-2">
+						<Button onClick={() => setCreateOpen(true)}>创建 Agent</Button>
+						<Button
+							variant="outline"
+							onClick={() => refreshAllStatus({ agents: items })}
+							disabled={loading || isRefreshingStatus}
+						>
+							{isRefreshingStatus ? "刷新中..." : "刷新状态"}
+						</Button>
+					</div>
+				</CardContent>
+			</Card>
+			<section className="grid gap-3">
 				{items.map((agent) => (
-					<article
-						key={agent.id}
-						className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
-					>
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<h3 className="text-sm font-semibold text-zinc-900">
-									{agent.name}
-								</h3>
-								<p className="text-xs text-zinc-500">{agent.baseUrl}</p>
-								<p className="mt-1 text-xs text-zinc-500">
-									{agent.description || "暂无描述"}
-								</p>
-								<p className="mt-1 text-xs text-zinc-500">
-									运行状态：{statusById[agent.id]?.text ?? "未观测"}
-								</p>
+					<Card key={agent.id} className="gap-3">
+						<CardHeader className="pb-0">
+							<div className="flex items-start justify-between gap-3">
+								<div className="space-y-1">
+									<CardTitle className="text-base">{agent.name}</CardTitle>
+									<CardDescription>{agent.baseUrl}</CardDescription>
+									<p className="text-xs text-muted-foreground">{agent.description || "暂无描述"}</p>
+									<p className="text-xs text-muted-foreground">运行状态：{statusById[agent.id]?.text ?? "未观测"}</p>
+								</div>
+								<Badge variant={agent.isEnabled ? "default" : "secondary"}>{agent.isEnabled ? "启用中" : "已禁用"}</Badge>
 							</div>
-							<span
-								className={`rounded-full px-2 py-1 text-xs ${agent.isEnabled ? "bg-emerald-100 text-emerald-700" : "bg-zinc-100 text-zinc-600"}`}
-							>
-								{agent.isEnabled ? "启用中" : "已禁用"}
-							</span>
-						</div>
-						<div className="mt-3 flex gap-2">
+						</CardHeader>
+						<CardContent className="flex gap-2 pt-0">
 							<Button
 								size="sm"
 								variant="outline"
@@ -684,24 +672,21 @@ function AgentsCardListPage() {
 							>
 								删除
 							</Button>
-						</div>
-					</article>
+						</CardContent>
+					</Card>
 				))}
 				{!items.length && !loading ? (
-					<p className="text-sm text-zinc-500">暂无 Agent，请点击上方创建。</p>
+					<Card>
+						<CardContent className="py-6 text-sm text-muted-foreground">暂无 Agent，请点击上方创建。</CardContent>
+					</Card>
 				) : null}
 			</section>
-			{createOpen ? (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-					onClick={() => setCreateOpen(false)}
-				>
-					<div
-						className="pointer-events-auto w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl"
-						onClick={(event) => event.stopPropagation()}
-					>
-						<h2 className="text-lg font-semibold text-zinc-900">创建 Agent</h2>
-						<div className="mt-4 grid gap-2">
+			<Dialog open={createOpen} onOpenChange={setCreateOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>创建 Agent</DialogTitle>
+					</DialogHeader>
+					<div className="grid gap-2">
 							<Label htmlFor="name">名称</Label>
 							<Input
 								id="name"
@@ -737,16 +722,15 @@ function AgentsCardListPage() {
 									setCreateForm((p) => ({ ...p, description: e.target.value }))
 								}
 							/>
-							<div className="mt-2 flex justify-end gap-2">
-								<Button variant="outline" onClick={() => setCreateOpen(false)}>
-									取消
-								</Button>
-								<Button onClick={handleCreate}>创建</Button>
-							</div>
+						<div className="mt-2 flex justify-end gap-2">
+							<Button variant="outline" onClick={() => setCreateOpen(false)}>
+								取消
+							</Button>
+							<Button onClick={handleCreate}>创建</Button>
 						</div>
 					</div>
-				</div>
-			) : null}
+				</DialogContent>
+			</Dialog>
 		</main>
 	);
 }

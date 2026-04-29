@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
+import { Badge } from "#/components/ui/badge";
+import { Button } from "#/components/ui/button";
+import { Card } from "#/components/ui/card";
+import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
 import type { ChatMessages } from "#/lib/demo-ai-hook";
@@ -18,15 +22,15 @@ import { useGuitarRecommendationChat } from "#/lib/demo-ai-hook";
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="flex flex-1 items-center justify-center px-4">
-			<div className="mx-auto w-full max-w-3xl text-center">
-				<h1 className="mb-4 bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-5xl font-bold text-transparent sm:text-6xl">
+			<Card className="mx-auto w-full max-w-3xl py-8 text-center">
+				<h1 className="bg-gradient-to-r from-rose-500 to-pink-500 bg-clip-text text-4xl font-bold text-transparent sm:text-5xl">
 					小红书 AI 助手
 				</h1>
-				<p className="mx-auto mb-6 w-full max-w-2xl text-base text-zinc-600 sm:text-lg">
+				<p className="mx-auto w-full max-w-2xl px-6 text-base text-muted-foreground sm:text-lg">
 					在这里直接进行对话式创作，快速完成选题拆解、内容润色和发布建议。
 				</p>
-				{children}
-			</div>
+				<div className="px-4">{children}</div>
+			</Card>
 		</div>
 	);
 }
@@ -95,15 +99,9 @@ function Messages({
 							}`}
 						>
 							<div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
-								{message.role === "assistant" ? (
-									<div className="mt-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 text-sm font-medium text-white">
-										AI
-									</div>
-								) : (
-									<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-zinc-800 text-sm font-medium text-white">
-										Y
-									</div>
-								)}
+								<Badge variant={message.role === "assistant" ? "default" : "secondary"} className="mt-1 h-8 w-8 justify-center rounded-lg p-0">
+									{message.role === "assistant" ? "AI" : "Y"}
+								</Badge>
 								<div className="flex-1 min-w-0">
 									{message.parts.map((part) => {
 										if (part.type === "text" && part.content) {
@@ -121,22 +119,15 @@ function Messages({
 								</div>
 								{/* TTS button for assistant messages */}
 								{message.role === "assistant" && textContent && (
-									<button
+									<Button
 										type="button"
-										onClick={() =>
-											isPlaying
-												? onStopSpeak()
-												: onSpeak(textContent, message.id)
-										}
-										className="flex-shrink-0 p-2 text-zinc-400 transition-colors hover:text-rose-500"
+										variant="ghost"
+										size="icon-sm"
+										onClick={() => (isPlaying ? onStopSpeak() : onSpeak(textContent, message.id))}
 										title={isPlaying ? "Stop speaking" : "Read aloud"}
 									>
-										{isPlaying ? (
-											<VolumeX className="w-4 h-4" />
-										) : (
-											<Volume2 className="w-4 h-4" />
-										)}
-									</button>
+										{isPlaying ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+									</Button>
 								)}
 							</div>
 						</div>
@@ -186,14 +177,10 @@ function ChatPage() {
 					<div className="space-y-3">
 						{isLoading && (
 							<div className="flex items-center justify-center">
-								<button
-									type="button"
-									onClick={stop}
-									className="flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-600"
-								>
-									<Square className="w-4 h-4 fill-current" />
+								<Button type="button" variant="destructive" onClick={stop}>
+									<Square className="h-4 w-4 fill-current" />
 									Stop
-								</button>
+								</Button>
 							</div>
 						)}
 						<form
@@ -205,33 +192,24 @@ function ChatPage() {
 								}
 							}}
 						>
-							<div className="relative max-w-xl mx-auto flex items-center gap-2">
-								<button
+							<div className="relative mx-auto flex max-w-xl items-center gap-2">
+								<Button
 									type="button"
+									variant={isRecording ? "default" : "outline"}
+									size="icon"
 									onClick={handleMicClick}
 									disabled={isLoading || isTranscribing}
-									className={`rounded-lg border p-3 transition-colors ${
-										isRecording
-											? "border-rose-500 bg-rose-500 text-white hover:bg-rose-600"
-											: "border-zinc-200 bg-white text-zinc-500 hover:text-rose-500"
-									} disabled:opacity-50`}
 									title={isRecording ? "Stop recording" : "Start recording"}
 								>
-									{isTranscribing ? (
-										<Loader2 className="w-4 h-4 animate-spin" />
-									) : isRecording ? (
-										<MicOff className="w-4 h-4" />
-									) : (
-										<Mic className="w-4 h-4" />
-									)}
-								</button>
+									{isTranscribing ? <Loader2 className="h-4 w-4 animate-spin" /> : isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+								</Button>
 
 								<div className="relative flex-1">
-									<textarea
+									<Textarea
 										value={input}
 										onChange={(e) => setInput(e.target.value)}
 										placeholder="请输入你想问 ZeroClaw 的内容..."
-										className="w-full resize-none overflow-hidden rounded-lg border border-zinc-200 bg-white py-3 pl-4 pr-12 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
+										className="w-full resize-none overflow-hidden pr-12"
 										rows={1}
 										style={{ minHeight: "44px", maxHeight: "200px" }}
 										disabled={isLoading}
@@ -249,13 +227,15 @@ function ChatPage() {
 											}
 										}}
 									/>
-									<button
+									<Button
 										type="submit"
+										size="icon-sm"
+										variant="ghost"
 										disabled={!input.trim() || isLoading}
-										className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-rose-500 transition-colors hover:text-rose-600 disabled:text-zinc-400 focus:outline-none"
+										className="absolute right-2 top-1/2 -translate-y-1/2"
 									>
-										<Send className="w-4 h-4" />
-									</button>
+										<Send className="h-4 w-4" />
+									</Button>
 								</div>
 							</div>
 						</form>
