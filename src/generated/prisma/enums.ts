@@ -9,7 +9,18 @@
 * 🟢 You can import this file directly.
 */
 
+export const AgentSessionStatus = {
+  active: 'active',
+  archived: 'archived'
+} as const
+
+export type AgentSessionStatus = (typeof AgentSessionStatus)[keyof typeof AgentSessionStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const AgentMessageRole = {
+  system: 'system',
+  user: 'user',
+  assistant: 'assistant'
+} as const
+
+export type AgentMessageRole = (typeof AgentMessageRole)[keyof typeof AgentMessageRole]

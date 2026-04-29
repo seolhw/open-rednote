@@ -8,30 +8,32 @@ datasource db {
 }
 
 model Agent {
-  id          String   @id @default(cuid())
-  name        String
-  runtimeType String   @default("zeroclaw")
-  baseUrl     String
-  token       String
-  description String?
-  isEnabled   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  runtimeType   String         @default("zeroclaw")
+  baseUrl       String
+  token         String
+  description   String?
+  isEnabled     Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  agentSessions AgentSession[]
 
   @@unique([name])
   @@map("agents")
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String         @id @default(cuid())
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String         @unique
+  emailVerified Boolean        @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   sessions      Session[]
   accounts      Account[]
+  agentSessions AgentSession[]
 
   @@map("users")
 }
@@ -82,4 +84,47 @@ model Verification {
 
   @@unique([identifier, value])
   @@map("verifications")
+}
+
+enum AgentSessionStatus {
+  active
+  archived
+}
+
+enum AgentMessageRole {
+  system
+  user
+  assistant
+}
+
+model AgentSession {
+  id            String             @id @default(cuid())
+  title         String
+  status        AgentSessionStatus @default(active)
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agentId       String?
+  agent         Agent?             @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  lastMessageAt DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  messages      AgentMessage[]
+
+  @@index([userId])
+  @@index([agentId])
+  @@map("agent_sessions")
+}
+
+model AgentMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   AgentSession     @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           AgentMessageRole
+  content        String
+  meta           Json?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@map("agent_messages")
 }

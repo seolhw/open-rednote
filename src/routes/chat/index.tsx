@@ -7,6 +7,7 @@ import {
 	Plus,
 	Send,
 	Square,
+	Trash2,
 	Volume2,
 	VolumeX,
 } from "lucide-react";
@@ -18,8 +19,8 @@ import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
-import type { ChatMessages, ChatSession } from "#/hooks/use-chat-hook";
-import { useChatHook } from "#/hooks/use-chat-hook";
+import type { ChatMessages, ChatSession } from "#/hooks/use-agent-chat-hook";
+import { useAgentChatHook } from "#/hooks/use-agent-chat-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -167,7 +168,8 @@ function ChatPage() {
 		sendMessage,
 		isLoading,
 		stop,
-	} = useChatHook();
+		deleteSession,
+	} = useAgentChatHook();
 
 	const handleMicClick = async () => {
 		if (isRecording) {
@@ -214,20 +216,33 @@ function ChatPage() {
 					{sessions.map((session) => {
 						const selected = session.id === selectedSessionId;
 						return (
-							<button
+							<div
 								key={session.id}
-								type="button"
-								onClick={() => selectSession({ sessionId: session.id })}
-								className={`w-full rounded-xl border p-3 text-left transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
+								className={`w-full rounded-xl border p-3 transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
 							>
-								<div className="mb-1 flex items-center gap-2 text-sm font-semibold text-zinc-700">
-									<MessageSquare className="h-4 w-4 text-zinc-500" />
-									<span className="truncate">{session.title}</span>
+								<div className="mb-1 flex items-start justify-between gap-2">
+									<button
+										type="button"
+										onClick={() => selectSession({ sessionId: session.id })}
+										className="flex min-w-0 items-center gap-2 text-left text-sm font-semibold text-zinc-700"
+									>
+										<MessageSquare className="h-4 w-4 shrink-0 text-zinc-500" />
+										<span className="truncate">{session.title}</span>
+									</button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-sm"
+										onClick={() => deleteSession({ sessionId: session.id })}
+										title="删除会话"
+									>
+										<Trash2 className="h-4 w-4" />
+									</Button>
 								</div>
 								<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
 									{getSessionPreview({ session })}
 								</p>
-							</button>
+							</div>
 						);
 					})}
 				</div>
