@@ -41,9 +41,6 @@ const buildGatewayUrl = ({
 	return url.toString();
 };
 
-const isBodyMethod = ({ method }: { method: ZeroClawMethod }) =>
-	method === "POST" || method === "PUT" || method === "PATCH";
-
 export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 	server: {
 		handlers: {
@@ -100,18 +97,15 @@ export const Route = createFileRoute("/api/agents/$agentId/gateway/request/")({
 				});
 
 				const contentType = parsed.data.contentType ?? "application/json";
-				const outboundBody =
-					isBodyMethod({ method: endpointResolved.method }) &&
-					parsed.data.body !== undefined
-						? contentType === "application/json"
-							? JSON.stringify(parsed.data.body)
-							: String(parsed.data.body)
-						: undefined;
+				const outboundBody = parsed.data.body
+					? JSON.stringify(parsed.data.body)
+					: undefined;
 
 				const headers: Record<string, string> = {
 					Authorization: `Bearer ${agent.token}`,
 					Accept: "application/json, text/plain, */*",
 				};
+
 				if (outboundBody !== undefined) {
 					headers["Content-Type"] = contentType;
 				}
