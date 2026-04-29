@@ -2,8 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "#/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "#/components/ui/dialog";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "#/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
@@ -22,19 +33,21 @@ type AgentListResponse = {
 	items: AgentItem[];
 };
 
-type AgentObserveResponse = {
-	agent: {
-		id: string;
-		name: string;
-		baseUrl: string;
-		isEnabled: boolean;
+type GatewayProbeResponse = {
+	ok: boolean;
+	status: number;
+	contentType: string;
+	targetUrl: string;
+	endpoint: {
+		key: string;
+		path: string;
+		method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	};
-	probes: {
-		health: { ok: boolean; status: number; url: string; body: string };
-		status: { ok: boolean; status: number; url: string; body: string };
-		apiHealth: { ok: boolean; status: number; url: string; body: string };
-		runningSessions: { ok: boolean; status: number; url: string; body: string };
+	ws: {
+		chatPath: string;
+		chatUrl: string;
 	};
+	data: unknown;
 };
 
 type RequestResult = {
@@ -82,7 +95,7 @@ const requestJson = async ({
 	body,
 }: {
 	url: string;
-	method?: "GET" | "POST" | "PATCH" | "DELETE";
+	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	body?: unknown;
 }): Promise<RequestResult> => {
 	const settled = await Promise.allSettled([
@@ -118,6 +131,22 @@ const requestJson = async ({
 
 type AgentCardStatus = { ok: boolean; text: string; updatedAt: number };
 
+const probeByGatewayRequest = async ({
+	agentId,
+	path,
+}: {
+	agentId: string;
+	path: string;
+}): Promise<RequestResult> =>
+	requestJson({
+		url: `/api/agents/${agentId}/gateway/request`,
+		method: "POST",
+		body: {
+			method: "GET",
+			path,
+		},
+	});
+
 function AgentsCardListPage() {
 	const [items, setItems] = useState<AgentItem[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -146,21 +175,27 @@ function AgentsCardListPage() {
 	}, []);
 
 	const refreshOneStatus = useCallback(async ({ id }: { id: string }) => {
-		const result = await requestJson({ url: `/api/agents/${id}/observe` });
-		if (!result.ok) {
+		const [healthResult, apiHealthResult] = await Promise.all([
+			probeByGatewayRequest({ agentId: id, path: "/health" }),
+			probeByGatewayRequest({ agentId: id, path: "/api/health" }),
+		]);
+
+		if (!healthResult.ok || !apiHealthResult.ok) {
 			setStatusById((p) => ({
 				...p,
 				[id]: {
 					ok: false,
-					text: `观测失败(${result.status})`,
+					text: `探测失败(health:${healthResult.status}, api:${apiHealthResult.status})`,
 					updatedAt: Date.now(),
 				},
 			}));
 			return;
 		}
-		const payload = result.data as AgentObserveResponse;
-		const ok = payload.probes.health.ok && payload.probes.apiHealth.ok;
-		const text = `health ${payload.probes.health.status} / api ${payload.probes.apiHealth.status}`;
+
+		const healthPayload = healthResult.data as GatewayProbeResponse;
+		const apiHealthPayload = apiHealthResult.data as GatewayProbeResponse;
+		const ok = healthPayload.ok && apiHealthPayload.ok;
+		const text = `health ${healthPayload.status} / api ${apiHealthPayload.status}`;
 		setStatusById((p) => ({ ...p, [id]: { ok, text, updatedAt: Date.now() } }));
 	}, []);
 
@@ -302,10 +337,16 @@ function AgentsCardListPage() {
 								<div className="space-y-1">
 									<CardTitle className="text-base">{agent.name}</CardTitle>
 									<CardDescription>{agent.baseUrl}</CardDescription>
-									<p className="text-xs text-muted-foreground">{agent.description || "暂无描述"}</p>
-									<p className="text-xs text-muted-foreground">运行状态：{statusById[agent.id]?.text ?? "未观测"}</p>
+									<p className="text-xs text-muted-foreground">
+										{agent.description || "暂无描述"}
+									</p>
+									<p className="text-xs text-muted-foreground">
+										运行状态：{statusById[agent.id]?.text ?? "未观测"}
+									</p>
 								</div>
-								<Badge variant={agent.isEnabled ? "default" : "secondary"}>{agent.isEnabled ? "启用中" : "已禁用"}</Badge>
+								<Badge variant={agent.isEnabled ? "default" : "secondary"}>
+									{agent.isEnabled ? "启用中" : "已禁用"}
+								</Badge>
 							</div>
 						</CardHeader>
 						<CardContent className="flex gap-2 pt-0">
@@ -340,7 +381,9 @@ function AgentsCardListPage() {
 				))}
 				{!items.length && !loading ? (
 					<Card>
-						<CardContent className="py-6 text-sm text-muted-foreground">暂无 Agent，请点击上方创建。</CardContent>
+						<CardContent className="py-6 text-sm text-muted-foreground">
+							暂无 Agent，请点击上方创建。
+						</CardContent>
 					</Card>
 				) : null}
 			</section>
@@ -350,41 +393,41 @@ function AgentsCardListPage() {
 						<DialogTitle>创建 Agent</DialogTitle>
 					</DialogHeader>
 					<div className="grid gap-2">
-							<Label htmlFor="name">名称</Label>
-							<Input
-								id="name"
-								value={createForm.name}
-								onChange={(e) =>
-									setCreateForm((p) => ({ ...p, name: e.target.value }))
-								}
-							/>
-							<Label htmlFor="baseUrl">Gateway Base URL</Label>
-							<Input
-								id="baseUrl"
-								placeholder="http://127.0.0.1:42617"
-								value={createForm.baseUrl}
-								onChange={(e) =>
-									setCreateForm((p) => ({ ...p, baseUrl: e.target.value }))
-								}
-							/>
-							<Label htmlFor="token">Token</Label>
-							<Input
-								id="token"
-								type="password"
-								value={createForm.token}
-								onChange={(e) =>
-									setCreateForm((p) => ({ ...p, token: e.target.value }))
-								}
-							/>
-							<Label htmlFor="description">描述</Label>
-							<Textarea
-								id="description"
-								rows={3}
-								value={createForm.description}
-								onChange={(e) =>
-									setCreateForm((p) => ({ ...p, description: e.target.value }))
-								}
-							/>
+						<Label htmlFor="name">名称</Label>
+						<Input
+							id="name"
+							value={createForm.name}
+							onChange={(e) =>
+								setCreateForm((p) => ({ ...p, name: e.target.value }))
+							}
+						/>
+						<Label htmlFor="baseUrl">Gateway Base URL</Label>
+						<Input
+							id="baseUrl"
+							placeholder="http://127.0.0.1:42617"
+							value={createForm.baseUrl}
+							onChange={(e) =>
+								setCreateForm((p) => ({ ...p, baseUrl: e.target.value }))
+							}
+						/>
+						<Label htmlFor="token">Token</Label>
+						<Input
+							id="token"
+							type="password"
+							value={createForm.token}
+							onChange={(e) =>
+								setCreateForm((p) => ({ ...p, token: e.target.value }))
+							}
+						/>
+						<Label htmlFor="description">描述</Label>
+						<Textarea
+							id="description"
+							rows={3}
+							value={createForm.description}
+							onChange={(e) =>
+								setCreateForm((p) => ({ ...p, description: e.target.value }))
+							}
+						/>
 						<div className="mt-2 flex justify-end gap-2">
 							<Button variant="outline" onClick={() => setCreateOpen(false)}>
 								取消

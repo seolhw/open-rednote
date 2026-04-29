@@ -34,7 +34,6 @@ import { Route as DemoApiAiTtsRouteImport } from './routes/demo/api.ai.tts'
 import { Route as DemoApiAiTranscriptionRouteImport } from './routes/demo/api.ai.transcription'
 import { Route as DemoApiAiStructuredRouteImport } from './routes/demo/api.ai.structured'
 import { Route as DemoApiAiImageRouteImport } from './routes/demo/api.ai.image'
-import { Route as ApiAgentsAgentIdObserveIndexRouteImport } from './routes/api/agents/$agentId/observe/index'
 import { Route as ApiAgentsAgentIdGatewayRequestIndexRouteImport } from './routes/api/agents/$agentId/gateway/request/index'
 
 const ChatRoute = ChatRouteImport.update({
@@ -162,12 +161,6 @@ const DemoApiAiImageRoute = DemoApiAiImageRouteImport.update({
   path: '/demo/api/ai/image',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAgentsAgentIdObserveIndexRoute =
-  ApiAgentsAgentIdObserveIndexRouteImport.update({
-    id: '/api/agents/$agentId/observe/',
-    path: '/api/agents/$agentId/observe/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiAgentsAgentIdGatewayRequestIndexRoute =
   ApiAgentsAgentIdGatewayRequestIndexRouteImport.update({
     id: '/api/agents/$agentId/gateway/request/',
@@ -201,7 +194,6 @@ export interface FileRoutesByFullPath {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
-  '/api/agents/$agentId/observe/': typeof ApiAgentsAgentIdObserveIndexRoute
   '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesByTo {
@@ -230,7 +222,6 @@ export interface FileRoutesByTo {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId': typeof ApiAgentsAgentIdIndexRoute
-  '/api/agents/$agentId/observe': typeof ApiAgentsAgentIdObserveIndexRoute
   '/api/agents/$agentId/gateway/request': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesById {
@@ -260,7 +251,6 @@ export interface FileRoutesById {
   '/demo/api/ai/transcription': typeof DemoApiAiTranscriptionRoute
   '/demo/api/ai/tts': typeof DemoApiAiTtsRoute
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
-  '/api/agents/$agentId/observe/': typeof ApiAgentsAgentIdObserveIndexRoute
   '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRouteTypes {
@@ -291,7 +281,6 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId/'
-    | '/api/agents/$agentId/observe/'
     | '/api/agents/$agentId/gateway/request/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -320,7 +309,6 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId'
-    | '/api/agents/$agentId/observe'
     | '/api/agents/$agentId/gateway/request'
   id:
     | '__root__'
@@ -349,7 +337,6 @@ export interface FileRouteTypes {
     | '/demo/api/ai/transcription'
     | '/demo/api/ai/tts'
     | '/api/agents/$agentId/'
-    | '/api/agents/$agentId/observe/'
     | '/api/agents/$agentId/gateway/request/'
   fileRoutesById: FileRoutesById
 }
@@ -379,7 +366,6 @@ export interface RootRouteChildren {
   DemoApiAiTranscriptionRoute: typeof DemoApiAiTranscriptionRoute
   DemoApiAiTtsRoute: typeof DemoApiAiTtsRoute
   ApiAgentsAgentIdIndexRoute: typeof ApiAgentsAgentIdIndexRoute
-  ApiAgentsAgentIdObserveIndexRoute: typeof ApiAgentsAgentIdObserveIndexRoute
   ApiAgentsAgentIdGatewayRequestIndexRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 
@@ -560,13 +546,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoApiAiImageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/agents/$agentId/observe/': {
-      id: '/api/agents/$agentId/observe/'
-      path: '/api/agents/$agentId/observe'
-      fullPath: '/api/agents/$agentId/observe/'
-      preLoaderRoute: typeof ApiAgentsAgentIdObserveIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/agents/$agentId/gateway/request/': {
       id: '/api/agents/$agentId/gateway/request/'
       path: '/api/agents/$agentId/gateway/request'
@@ -603,7 +582,6 @@ const rootRouteChildren: RootRouteChildren = {
   DemoApiAiTranscriptionRoute: DemoApiAiTranscriptionRoute,
   DemoApiAiTtsRoute: DemoApiAiTtsRoute,
   ApiAgentsAgentIdIndexRoute: ApiAgentsAgentIdIndexRoute,
-  ApiAgentsAgentIdObserveIndexRoute: ApiAgentsAgentIdObserveIndexRoute,
   ApiAgentsAgentIdGatewayRequestIndexRoute:
     ApiAgentsAgentIdGatewayRequestIndexRoute,
 }
