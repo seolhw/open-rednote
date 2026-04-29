@@ -95,9 +95,7 @@ function Messages({
 						<div
 							key={message.id}
 							className={`rounded-2xl p-4 transition ${
-								message.role === "assistant"
-									? "bg-muted/60"
-									: "bg-background"
+								message.role === "assistant" ? "bg-muted/60" : "bg-background"
 							}`}
 						>
 							<div className="mx-auto flex w-full max-w-3xl items-start gap-4">

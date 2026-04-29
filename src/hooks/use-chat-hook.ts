@@ -178,6 +178,9 @@ export const useChatHook = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const abortRef = useRef<AbortController | null>(null);
 	const preferredAgentIdRef = useRef<string | null>(null);
+	const wsBaseChatUrlRef = useRef("");
+	const wsSocketRef = useRef<WebSocket | null>(null);
+	const activeWsSessionIdRef = useRef("");
 
 	const selectedSession =
 		sessions.find((item) => item.id === selectedSessionId) ?? sessions[0];
@@ -218,12 +221,31 @@ export const useChatHook = () => {
 	};
 
 	const createSession = () => {
-		void refreshSessions({});
+		const created: ChatSession = {
+			id: crypto.randomUUID(),
+			title: `新会话 ${sessions.length + 1}`,
+			messages: [],
+			createdAt: nowIso(),
+			updatedAt: nowIso(),
+		};
+		setSessions((prev) => [created, ...prev]);
+		setSelectedSessionId(created.id);
+		void connectSessionViaWs({
+			sessionId: created.id,
+			sessionName: created.title,
+		});
 	};
 
 	const selectSession = ({ sessionId }: { sessionId: string }) => {
 		setSelectedSessionId(sessionId);
+		const current = sessions.find((item) => item.id === sessionId);
 		void loadSessionState({ sessionId });
+		if (current) {
+			void connectSessionViaWs({
+				sessionId: current.id,
+				sessionName: current.title,
+			});
+		}
 	};
 
 	const resolveAgentId = async ({
@@ -248,6 +270,10 @@ export const useChatHook = () => {
 	const sendMessage = async (input: string) => {
 		const content = input.trim();
 		if (!content || !selectedSession || !selectedSession.id) return;
+		void connectSessionViaWs({
+			sessionId: selectedSession.id,
+			sessionName: selectedSession.title,
+		});
 		const userMessage: ChatMessage = {
 			id: crypto.randomUUID(),
 			role: "user",
@@ -292,6 +318,7 @@ export const useChatHook = () => {
 			body: {
 				message: content,
 				session_id: selectedSession.id,
+				name: selectedSession.title,
 				context: toConversationText({ messages: nextMessages }),
 			},
 			signal: controller.signal,
@@ -374,6 +401,12 @@ export const useChatHook = () => {
 
 	useEffect(() => {
 		void refreshSessions({});
+		return () => {
+			if (wsSocketRef.current) {
+				wsSocketRef.current.close();
+				wsSocketRef.current = null;
+			}
+		};
 	}, []);
 
 	return {
@@ -386,6 +419,47 @@ export const useChatHook = () => {
 		isLoading,
 		stop,
 	};
+
+	async function connectSessionViaWs({
+		sessionId,
+		sessionName,
+	}: {
+		sessionId: string;
+		sessionName: string;
+	}) {
+		const agentId = await resolveAgentId({});
+		if (!agentId) return;
+		if (!wsBaseChatUrlRef.current) {
+			const wsInfoResult = await requestGateway({
+				agentId,
+				path: "/health",
+				method: "GET",
+			});
+			if (!wsInfoResult.ok) return;
+			const wsChatUrl = extractWsChatUrl({ payload: wsInfoResult.data });
+			if (!wsChatUrl) return;
+			wsBaseChatUrlRef.current = wsChatUrl;
+		}
+		if (activeWsSessionIdRef.current === sessionId && wsSocketRef.current)
+			return;
+		if (wsSocketRef.current) {
+			wsSocketRef.current.close();
+			wsSocketRef.current = null;
+		}
+		const url = new URL(wsBaseChatUrlRef.current);
+		url.searchParams.set("session_id", sessionId);
+		url.searchParams.set("name", sessionName);
+		const socket = new WebSocket(url.toString());
+		socket.onopen = () => {
+			activeWsSessionIdRef.current = sessionId;
+		};
+		socket.onclose = () => {
+			if (activeWsSessionIdRef.current === sessionId) {
+				activeWsSessionIdRef.current = "";
+			}
+		};
+		wsSocketRef.current = socket;
+	}
 };
 
 type RecordValue = Record<string, unknown>;
@@ -475,12 +549,14 @@ const requestGateway = async ({
 	path,
 	method,
 	body,
+	query,
 	signal,
 }: {
 	agentId: string;
 	path: string;
 	method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 	body?: unknown;
+	query?: Record<string, string>;
 	signal?: AbortSignal;
 }): Promise<RequestResult> =>
 	requestJson({
@@ -489,8 +565,20 @@ const requestGateway = async ({
 		body: {
 			method,
 			path,
+			query,
 			body,
 			contentType: "application/json",
 		},
 		signal,
 	});
+
+const extractWsChatUrl = ({ payload }: { payload: unknown }): string => {
+	const root = asRecord({ value: payload });
+	if (!root) return "";
+	const data = asRecord({ value: root.data });
+	if (!data) return "";
+	const ws = asRecord({ value: data.ws });
+	if (!ws) return "";
+	const chatUrl = ws.chatUrl;
+	return typeof chatUrl === "string" ? chatUrl : "";
+};
