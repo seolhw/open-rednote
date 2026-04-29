@@ -16,8 +16,8 @@ import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
-import type { ChatMessages } from "#/lib/demo-ai-hook";
-import { useGuitarRecommendationChat } from "#/lib/demo-ai-hook";
+import type { ChatMessages } from "#/hooks/use-chat-hook";
+import { useChatHook } from "#/hooks/use-chat-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -158,8 +158,7 @@ function ChatPage() {
 		useAudioRecorder();
 	const { playingId, speak, stop: stopTTS } = useTTS();
 
-	const { messages, sendMessage, isLoading, stop } =
-		useGuitarRecommendationChat();
+	const { messages, sendMessage, isLoading, stop } = useChatHook();
 
 	const handleMicClick = async () => {
 		if (isRecording) {
