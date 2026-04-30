@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { env } from "#/env";
+import { jsonResponse } from "#/server";
 
 const AgentUpdateSchema = z
 	.object({
@@ -13,12 +13,6 @@ const AgentUpdateSchema = z
 	})
 	.refine((value) => Object.keys(value).length > 0, {
 		message: "至少提供一个可更新字段",
-	});
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
 	});
 
 export const Route = createFileRoute("/api/agents/$agentId/")({

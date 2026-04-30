@@ -1,34 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { auth } from "#/lib/auth";
+import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const UpdateCurrentUserSchema = z
 	.object({
 		name: z.string().min(1).max(100).optional(),
-		image: z.string().url().nullable().optional(),
+		image: z.url().nullable().optional(),
 	})
 	.refine((data) => data.name !== undefined || data.image !== undefined, {
 		message: "至少提供一个待更新字段",
 	});
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
-
-const getSessionUser = async ({ request }: { request: Request }) => {
-	const session = await auth.api.getSession({
-		headers: request.headers,
-	});
-
-	if (!session?.user) {
-		return null;
-	}
-
-	return session.user;
-};
 
 export const Route = createFileRoute("/api/users/me/")({
 	server: {

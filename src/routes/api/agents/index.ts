@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { env } from "#/env";
+import { jsonResponse } from "#/server";
 
 const AgentCreateSchema = z.object({
 	name: z.string().min(1),
@@ -30,12 +30,6 @@ const toAgentPublic = ({ agent }: { agent: AgentPublic }) => ({
 	createdAt: agent.createdAt,
 	updatedAt: agent.updatedAt,
 });
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
 
 export const Route = createFileRoute("/api/agents/")({
 	server: {

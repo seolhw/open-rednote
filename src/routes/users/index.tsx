@@ -2,29 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
 import { auth } from "#/lib/auth";
+import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const UsersQuerySchema = z.object({
 	page: z.coerce.number().int().positive().default(1),
 	pageSize: z.coerce.number().int().positive().max(100).default(20),
 });
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
-
-const getSessionUser = async ({ request }: { request: Request }) => {
-	const session = await auth.api.getSession({
-		headers: request.headers,
-	});
-
-	if (!session?.user) {
-		return null;
-	}
-
-	return session.user;
-};
 
 export const Route = createFileRoute("/users/")({
 	server: {

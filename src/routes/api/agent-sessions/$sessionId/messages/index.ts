@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { env } from "#/env";
-import { auth } from "#/lib/auth";
+import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const QuerySchema = z.object({
 	take: z.coerce.number().int().positive().max(200).default(200),
@@ -13,17 +13,6 @@ const CreateMessageSchema = z.object({
 	content: z.string().min(1),
 	meta: z.unknown().optional(),
 });
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
-
-const getSessionUser = async ({ request }: { request: Request }) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	return session?.user ?? null;
-};
 
 export const Route = createFileRoute(
 	"/api/agent-sessions/$sessionId/messages/",
