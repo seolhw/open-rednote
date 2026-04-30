@@ -6,7 +6,7 @@ export const env = createEnv({
 		SERVER_URL: z.url().optional(),
 		ZEROCLAW_URL: z.url().optional(),
 		ZEROCLAW_TOKEN: z.string().min(1).optional(),
-		DATABASE_URL: z.string().min(1).optional(),
+		DATABASE_URL: z.string().min(1),
 		BETTER_AUTH_SECRET: z.string().min(1).optional(),
 		BETTER_AUTH_URL: z.url().optional(),
 	},

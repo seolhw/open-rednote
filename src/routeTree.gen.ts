@@ -42,7 +42,6 @@ import { Route as DemoApiAiTranscriptionRouteImport } from './routes/demo/api.ai
 import { Route as DemoApiAiStructuredRouteImport } from './routes/demo/api.ai.structured'
 import { Route as DemoApiAiImageRouteImport } from './routes/demo/api.ai.image'
 import { Route as ApiAgentSessionsSessionIdMessagesIndexRouteImport } from './routes/api/agent-sessions/$sessionId/messages/index'
-import { Route as ApiAgentsAgentIdGatewayRequestIndexRouteImport } from './routes/api/agents/$agentId/gateway/request/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -211,12 +210,6 @@ const ApiAgentSessionsSessionIdMessagesIndexRoute =
     path: '/api/agent-sessions/$sessionId/messages/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAgentsAgentIdGatewayRequestIndexRoute =
-  ApiAgentsAgentIdGatewayRequestIndexRouteImport.update({
-    id: '/api/agents/$agentId/gateway/request/',
-    path: '/api/agents/$agentId/gateway/request/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -252,7 +245,6 @@ export interface FileRoutesByFullPath {
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
   '/api/users/me/': typeof ApiUsersMeIndexRoute
   '/api/agent-sessions/$sessionId/messages/': typeof ApiAgentSessionsSessionIdMessagesIndexRoute
-  '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -288,7 +280,6 @@ export interface FileRoutesByTo {
   '/api/agents/$agentId': typeof ApiAgentsAgentIdIndexRoute
   '/api/users/me': typeof ApiUsersMeIndexRoute
   '/api/agent-sessions/$sessionId/messages': typeof ApiAgentSessionsSessionIdMessagesIndexRoute
-  '/api/agents/$agentId/gateway/request': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -325,7 +316,6 @@ export interface FileRoutesById {
   '/api/agents/$agentId/': typeof ApiAgentsAgentIdIndexRoute
   '/api/users/me/': typeof ApiUsersMeIndexRoute
   '/api/agent-sessions/$sessionId/messages/': typeof ApiAgentSessionsSessionIdMessagesIndexRoute
-  '/api/agents/$agentId/gateway/request/': typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -363,7 +353,6 @@ export interface FileRouteTypes {
     | '/api/agents/$agentId/'
     | '/api/users/me/'
     | '/api/agent-sessions/$sessionId/messages/'
-    | '/api/agents/$agentId/gateway/request/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -399,7 +388,6 @@ export interface FileRouteTypes {
     | '/api/agents/$agentId'
     | '/api/users/me'
     | '/api/agent-sessions/$sessionId/messages'
-    | '/api/agents/$agentId/gateway/request'
   id:
     | '__root__'
     | '/'
@@ -435,7 +423,6 @@ export interface FileRouteTypes {
     | '/api/agents/$agentId/'
     | '/api/users/me/'
     | '/api/agent-sessions/$sessionId/messages/'
-    | '/api/agents/$agentId/gateway/request/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -472,7 +459,6 @@ export interface RootRouteChildren {
   ApiAgentsAgentIdIndexRoute: typeof ApiAgentsAgentIdIndexRoute
   ApiUsersMeIndexRoute: typeof ApiUsersMeIndexRoute
   ApiAgentSessionsSessionIdMessagesIndexRoute: typeof ApiAgentSessionsSessionIdMessagesIndexRoute
-  ApiAgentsAgentIdGatewayRequestIndexRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -708,13 +694,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAgentSessionsSessionIdMessagesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/agents/$agentId/gateway/request/': {
-      id: '/api/agents/$agentId/gateway/request/'
-      path: '/api/agents/$agentId/gateway/request'
-      fullPath: '/api/agents/$agentId/gateway/request/'
-      preLoaderRoute: typeof ApiAgentsAgentIdGatewayRequestIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -753,8 +732,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiUsersMeIndexRoute: ApiUsersMeIndexRoute,
   ApiAgentSessionsSessionIdMessagesIndexRoute:
     ApiAgentSessionsSessionIdMessagesIndexRoute,
-  ApiAgentsAgentIdGatewayRequestIndexRoute:
-    ApiAgentsAgentIdGatewayRequestIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

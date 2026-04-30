@@ -11,19 +11,19 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // Clear existing todos
-  await prisma.todo.deleteMany()
+  // // Clear existing todos
+  // await prisma.todo.deleteMany()
 
-  // Create example todos
-  const todos = await prisma.todo.createMany({
-    data: [
-      { title: 'Buy groceries' },
-      { title: 'Read a book' },
-      { title: 'Workout' },
-    ],
-  })
+  // // Create example todos
+  // const todos = await prisma.todo.createMany({
+  //   data: [
+  //     { title: 'Buy groceries' },
+  //     { title: 'Read a book' },
+  //     { title: 'Workout' },
+  //   ],
+  // })
 
-  console.log(`✅ Created ${todos.count} todos`)
+  // console.log(`✅ Created ${todos.count} todos`)
 }
 
 main()

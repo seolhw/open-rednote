@@ -25,13 +25,6 @@ export const Route = createFileRoute("/api/agents/$agentId/")({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				if (!env.DATABASE_URL) {
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
-				}
-
 				const prisma = getPrisma();
 				const agent = await prisma.agent.findUnique({
 					where: { id: params.agentId },
@@ -53,13 +46,6 @@ export const Route = createFileRoute("/api/agents/$agentId/")({
 				return jsonResponse({ status: 200, data: agent });
 			},
 			PATCH: async ({ request, params }) => {
-				if (!env.DATABASE_URL) {
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
-				}
-
 				const parsed = AgentUpdateSchema.safeParse(await request.json());
 				if (!parsed.success) {
 					return jsonResponse({
@@ -94,13 +80,6 @@ export const Route = createFileRoute("/api/agents/$agentId/")({
 				return jsonResponse({ status: 200, data: updated });
 			},
 			DELETE: async ({ params }) => {
-				if (!env.DATABASE_URL) {
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
-				}
-
 				const prisma = getPrisma();
 				const existing = await prisma.agent.findUnique({
 					where: { id: params.agentId },

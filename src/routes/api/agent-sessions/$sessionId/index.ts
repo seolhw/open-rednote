@@ -28,11 +28,6 @@ export const Route = createFileRoute("/api/agent-sessions/$sessionId/")({
 	server: {
 		handlers: {
 			GET: async ({ request, params }) => {
-				if (!env.DATABASE_URL)
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
 				const user = await getSessionUser({ request });
 				if (!user)
 					return jsonResponse({ status: 401, data: { error: "未登录" } });
@@ -69,11 +64,6 @@ export const Route = createFileRoute("/api/agent-sessions/$sessionId/")({
 				});
 			},
 			PATCH: async ({ request, params }) => {
-				if (!env.DATABASE_URL)
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
 				const user = await getSessionUser({ request });
 				if (!user)
 					return jsonResponse({ status: 401, data: { error: "未登录" } });
@@ -130,11 +120,6 @@ export const Route = createFileRoute("/api/agent-sessions/$sessionId/")({
 				});
 			},
 			DELETE: async ({ request, params }) => {
-				if (!env.DATABASE_URL)
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
 				const user = await getSessionUser({ request });
 				if (!user)
 					return jsonResponse({ status: 401, data: { error: "未登录" } });

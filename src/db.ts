@@ -11,10 +11,6 @@ export const getPrisma = (): PrismaClient => {
 		return globalThis.__prisma;
 	}
 
-	if (!env.DATABASE_URL) {
-		throw new Error("DATABASE_URL 未配置");
-	}
-
 	const adapter = new PrismaPg({
 		connectionString: env.DATABASE_URL,
 	});

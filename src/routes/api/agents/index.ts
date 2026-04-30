@@ -41,13 +41,6 @@ export const Route = createFileRoute("/api/agents/")({
 	server: {
 		handlers: {
 			GET: async () => {
-				if (!env.DATABASE_URL) {
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
-				}
-
 				const prisma = getPrisma();
 				const agents = await prisma.agent.findMany({
 					orderBy: { createdAt: "desc" },
@@ -68,13 +61,6 @@ export const Route = createFileRoute("/api/agents/")({
 				});
 			},
 			POST: async ({ request }) => {
-				if (!env.DATABASE_URL) {
-					return jsonResponse({
-						status: 500,
-						data: { error: "DATABASE_URL 未配置" },
-					});
-				}
-
 				const parsed = AgentCreateSchema.safeParse(await request.json());
 				if (!parsed.success) {
 					return jsonResponse({
