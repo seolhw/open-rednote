@@ -244,7 +244,7 @@ function ChatPage() {
 	}, [messages, selectedSessionId, streamingAssistantText, streamingSessionId]);
 
 	const getSessionPreview = ({ session }: { session: ChatSession }) => {
-		const last = session.messages.at(-1);
+		const last = session.lastMessage;
 		if (!last) {
 			return "暂无消息";
 		}

@@ -34,6 +34,7 @@ const toChatSession = ({
 	messages,
 	createdAt: item.createdAt,
 	updatedAt: item.updatedAt,
+	lastMessage: item.lastMessage ? toChatMessage({ item: item.lastMessage }) : null,
 });
 
 const toWsPayload = ({

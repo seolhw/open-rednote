@@ -12,6 +12,7 @@ export interface AgentSessionItem {
 	createdAt: string;
 	updatedAt: string;
 	messageCount: number;
+	lastMessage: AgentMessageItem | null;
 }
 
 export interface AgentMessageItem {
@@ -35,6 +36,7 @@ export interface ChatSession {
 	id: string;
 	title: string;
 	messages: ChatMessage[];
+	lastMessage: ChatMessage | null;
 	createdAt: string;
 	updatedAt: string;
 }

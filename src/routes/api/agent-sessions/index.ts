@@ -53,6 +53,16 @@ export const Route = createFileRoute("/api/agent-sessions/")({
 						createdAt: true,
 						updatedAt: true,
 						_count: { select: { messages: true } },
+						messages: {
+							orderBy: { createdAt: "desc" },
+							take: 1,
+							select: {
+								id: true,
+								content: true,
+								role: true,
+								createdAt: true,
+							},
+						},
 					},
 				});
 
@@ -68,6 +78,7 @@ export const Route = createFileRoute("/api/agent-sessions/")({
 							createdAt: row.createdAt,
 							updatedAt: row.updatedAt,
 							messageCount: row._count.messages,
+							lastMessage: row.messages[0] ?? null,
 						})),
 					},
 				});
