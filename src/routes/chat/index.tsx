@@ -257,7 +257,7 @@ function ChatPage() {
 	};
 
 	return (
-		<div className="mx-auto grid min-h-0 w-full max-w-[1280px] flex-1 grid-cols-[300px_minmax(0,1fr)] gap-4 py-6">
+		<div className="mx-auto grid h-[calc(100vh-80px-60px-2px)] min-h-0 w-full max-w-[1280px] flex-1 grid-cols-[300px_minmax(0,1fr)] gap-4 py-6">
 			<Card className="flex min-h-0 flex-col overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
 				<div className="mb-3 flex items-center justify-between">
 					<p className="text-sm font-semibold">会话</p>
