@@ -5,8 +5,9 @@ import {
 	type CreateAgentPayload,
 	createAgent,
 	deleteAgent,
+	getAgentApiHealth,
+	getAgentHealth,
 	listAgents,
-	probeByGatewayRequest,
 	type UpdateAgentPayload,
 	updateAgent,
 } from "#/api/agent";
@@ -72,13 +73,15 @@ export const useAgentAdminHook = () => {
 	const refreshOneStatus = useCallback(
 		async ({ agentId }: { agentId: string }) => {
 			const [healthSettled, apiHealthSettled] = await Promise.allSettled([
-				probeByGatewayRequest({ agentId, path: "/health" }),
-				probeByGatewayRequest({ agentId, path: "/api/health" }),
+				getAgentHealth(),
+				getAgentApiHealth(),
 			]);
 
 			if (
 				healthSettled.status === "rejected" ||
-				apiHealthSettled.status === "rejected"
+				apiHealthSettled.status === "rejected" ||
+				!healthSettled.value ||
+				!apiHealthSettled.value
 			) {
 				setStatusById((prev) => ({
 					...prev,
@@ -93,8 +96,13 @@ export const useAgentAdminHook = () => {
 
 			const healthPayload = healthSettled.value;
 			const apiHealthPayload = apiHealthSettled.value;
-			const ok = healthPayload.ok && apiHealthPayload.ok;
-			const text = `health ${healthPayload.status} / api ${apiHealthPayload.status}`;
+			const components = Object.values(apiHealthPayload.health.components);
+			const okCount = components.filter(
+				(component) => component.status === "ok",
+			).length;
+			const totalCount = components.length;
+			const ok = healthPayload.status === "ok" && okCount === totalCount;
+			const text = `health ${healthPayload.status} / components ${okCount}/${totalCount}`;
 
 			setStatusById((prev) => ({
 				...prev,

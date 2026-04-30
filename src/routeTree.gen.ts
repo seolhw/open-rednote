@@ -28,11 +28,11 @@ import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DocsIdIndexRouteImport } from './routes/docs/$id/index'
 import { Route as BlogIdIndexRouteImport } from './routes/blog/$id/index'
+import { Route as ApiZeroclawIndexRouteImport } from './routes/api/zeroclaw/index'
 import { Route as ApiAgentsIndexRouteImport } from './routes/api/agents/index'
 import { Route as ApiAgentSessionsIndexRouteImport } from './routes/api/agent-sessions/index'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
 import { Route as DemoFormAddressRouteImport } from './routes/demo/form.address'
-import { Route as ApiZeroclawChatRouteImport } from './routes/api/zeroclaw/chat'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAgentsEnabledRouteImport } from './routes/api/agents/enabled'
 import { Route as ApiUsersMeIndexRouteImport } from './routes/api/users/me/index'
@@ -140,6 +140,11 @@ const BlogIdIndexRoute = BlogIdIndexRouteImport.update({
   path: '/blog/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiZeroclawIndexRoute = ApiZeroclawIndexRouteImport.update({
+  id: '/api/zeroclaw/',
+  path: '/api/zeroclaw/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAgentsIndexRoute = ApiAgentsIndexRouteImport.update({
   id: '/api/agents/',
   path: '/api/agents/',
@@ -158,11 +163,6 @@ const DemoFormSimpleRoute = DemoFormSimpleRouteImport.update({
 const DemoFormAddressRoute = DemoFormAddressRouteImport.update({
   id: '/demo/form/address',
   path: '/demo/form/address',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiZeroclawChatRoute = ApiZeroclawChatRouteImport.update({
-  id: '/api/zeroclaw/chat',
-  path: '/api/zeroclaw/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -244,11 +244,11 @@ export interface FileRoutesByFullPath {
   '/users/': typeof UsersIndexRoute
   '/api/agents/enabled': typeof ApiAgentsEnabledRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agent-sessions/': typeof ApiAgentSessionsIndexRoute
   '/api/agents/': typeof ApiAgentsIndexRoute
+  '/api/zeroclaw/': typeof ApiZeroclawIndexRoute
   '/blog/$id/': typeof BlogIdIndexRoute
   '/docs/$id/': typeof DocsIdIndexRoute
   '/api/agent-sessions/$sessionId/ws': typeof ApiAgentSessionsSessionIdWsRoute
@@ -281,11 +281,11 @@ export interface FileRoutesByTo {
   '/users': typeof UsersIndexRoute
   '/api/agents/enabled': typeof ApiAgentsEnabledRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agent-sessions': typeof ApiAgentSessionsIndexRoute
   '/api/agents': typeof ApiAgentsIndexRoute
+  '/api/zeroclaw': typeof ApiZeroclawIndexRoute
   '/blog/$id': typeof BlogIdIndexRoute
   '/docs/$id': typeof DocsIdIndexRoute
   '/api/agent-sessions/$sessionId/ws': typeof ApiAgentSessionsSessionIdWsRoute
@@ -319,11 +319,11 @@ export interface FileRoutesById {
   '/users/': typeof UsersIndexRoute
   '/api/agents/enabled': typeof ApiAgentsEnabledRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/zeroclaw/chat': typeof ApiZeroclawChatRoute
   '/demo/form/address': typeof DemoFormAddressRoute
   '/demo/form/simple': typeof DemoFormSimpleRoute
   '/api/agent-sessions/': typeof ApiAgentSessionsIndexRoute
   '/api/agents/': typeof ApiAgentsIndexRoute
+  '/api/zeroclaw/': typeof ApiZeroclawIndexRoute
   '/blog/$id/': typeof BlogIdIndexRoute
   '/docs/$id/': typeof DocsIdIndexRoute
   '/api/agent-sessions/$sessionId/ws': typeof ApiAgentSessionsSessionIdWsRoute
@@ -358,11 +358,11 @@ export interface FileRouteTypes {
     | '/users/'
     | '/api/agents/enabled'
     | '/api/auth/$'
-    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agent-sessions/'
     | '/api/agents/'
+    | '/api/zeroclaw/'
     | '/blog/$id/'
     | '/docs/$id/'
     | '/api/agent-sessions/$sessionId/ws'
@@ -395,11 +395,11 @@ export interface FileRouteTypes {
     | '/users'
     | '/api/agents/enabled'
     | '/api/auth/$'
-    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agent-sessions'
     | '/api/agents'
+    | '/api/zeroclaw'
     | '/blog/$id'
     | '/docs/$id'
     | '/api/agent-sessions/$sessionId/ws'
@@ -432,11 +432,11 @@ export interface FileRouteTypes {
     | '/users/'
     | '/api/agents/enabled'
     | '/api/auth/$'
-    | '/api/zeroclaw/chat'
     | '/demo/form/address'
     | '/demo/form/simple'
     | '/api/agent-sessions/'
     | '/api/agents/'
+    | '/api/zeroclaw/'
     | '/blog/$id/'
     | '/docs/$id/'
     | '/api/agent-sessions/$sessionId/ws'
@@ -470,11 +470,11 @@ export interface RootRouteChildren {
   UsersIndexRoute: typeof UsersIndexRoute
   ApiAgentsEnabledRoute: typeof ApiAgentsEnabledRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiZeroclawChatRoute: typeof ApiZeroclawChatRoute
   DemoFormAddressRoute: typeof DemoFormAddressRoute
   DemoFormSimpleRoute: typeof DemoFormSimpleRoute
   ApiAgentSessionsIndexRoute: typeof ApiAgentSessionsIndexRoute
   ApiAgentsIndexRoute: typeof ApiAgentsIndexRoute
+  ApiZeroclawIndexRoute: typeof ApiZeroclawIndexRoute
   BlogIdIndexRoute: typeof BlogIdIndexRoute
   DocsIdIndexRoute: typeof DocsIdIndexRoute
   ApiAgentSessionsSessionIdWsRoute: typeof ApiAgentSessionsSessionIdWsRoute
@@ -623,6 +623,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/zeroclaw/': {
+      id: '/api/zeroclaw/'
+      path: '/api/zeroclaw'
+      fullPath: '/api/zeroclaw/'
+      preLoaderRoute: typeof ApiZeroclawIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/agents/': {
       id: '/api/agents/'
       path: '/api/agents'
@@ -649,13 +656,6 @@ declare module '@tanstack/react-router' {
       path: '/demo/form/address'
       fullPath: '/demo/form/address'
       preLoaderRoute: typeof DemoFormAddressRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/zeroclaw/chat': {
-      id: '/api/zeroclaw/chat'
-      path: '/api/zeroclaw/chat'
-      fullPath: '/api/zeroclaw/chat'
-      preLoaderRoute: typeof ApiZeroclawChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -758,11 +758,11 @@ const rootRouteChildren: RootRouteChildren = {
   UsersIndexRoute: UsersIndexRoute,
   ApiAgentsEnabledRoute: ApiAgentsEnabledRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiZeroclawChatRoute: ApiZeroclawChatRoute,
   DemoFormAddressRoute: DemoFormAddressRoute,
   DemoFormSimpleRoute: DemoFormSimpleRoute,
   ApiAgentSessionsIndexRoute: ApiAgentSessionsIndexRoute,
   ApiAgentsIndexRoute: ApiAgentsIndexRoute,
+  ApiZeroclawIndexRoute: ApiZeroclawIndexRoute,
   BlogIdIndexRoute: BlogIdIndexRoute,
   DocsIdIndexRoute: DocsIdIndexRoute,
   ApiAgentSessionsSessionIdWsRoute: ApiAgentSessionsSessionIdWsRoute,
