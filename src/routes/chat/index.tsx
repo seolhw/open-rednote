@@ -116,10 +116,11 @@ function Messages({
 									}
 									return parseMessageBlocks({ text: part.content }).map(
 										(block, blockIndex) => {
+											const blockKey = `${message.id}-${partIndex}-${blockIndex}`;
 											if (block.type === "think") {
 												return (
 													<details
-														key={`${message.id}`}
+														key={blockKey}
 														className="mb-2 rounded-xl border border-dashed border-border/70 bg-background/60 p-2"
 													>
 														<summary className="cursor-pointer text-xs text-muted-foreground">
@@ -134,7 +135,7 @@ function Messages({
 											if (block.type === "tool_call") {
 												return (
 													<details
-														key={`${message.id}`}
+														key={blockKey}
 														className="mb-2 rounded-xl border border-dashed border-emerald-400/60 bg-emerald-50/50 p-2"
 													>
 														<summary className="cursor-pointer text-xs text-emerald-700">
@@ -149,7 +150,7 @@ function Messages({
 											return (
 												<div
 													className={`min-w-0 prose max-w-none prose-sm ${isAssistant ? "dark:prose-invert" : "prose-invert"}`}
-													key={`${message.id}`}
+													key={blockKey}
 												>
 													<Streamdown>{block.content}</Streamdown>
 												</div>
@@ -256,7 +257,7 @@ function ChatPage() {
 	};
 
 	return (
-		<div className="mx-auto mt-6 grid flex-1 min-h-[640px] w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
+		<div className="mx-auto mt-6 grid flex-1 w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
 			<Card className="overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
 				<div className="mb-3 flex items-center justify-between">
 					<p className="text-sm font-semibold">会话</p>
@@ -282,30 +283,31 @@ function ChatPage() {
 							return (
 								<div
 									key={session.id}
-									className={`w-full rounded-xl border p-3 transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
+									className={`relative w-full rounded-xl border p-3 transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
 								>
-									<div className="mb-1 flex items-start justify-between gap-2">
-										<button
-											type="button"
-											onClick={() => selectSession({ sessionId: session.id })}
-											className="flex min-w-0 items-center gap-2 text-left text-sm font-semibold text-zinc-700"
-										>
+									<button
+										type="button"
+										onClick={() => selectSession({ sessionId: session.id })}
+										className="block w-full pr-10 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									>
+										<div className="mb-1 flex min-w-0 items-center gap-2 text-sm font-semibold text-zinc-700">
 											<MessageSquare className="h-4 w-4 shrink-0 text-zinc-500" />
 											<span className="truncate">{session.title}</span>
-										</button>
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon-sm"
-											onClick={() => deleteSession({ sessionId: session.id })}
-											title="删除会话"
-										>
-											<Trash2 className="h-4 w-4" />
-										</Button>
-									</div>
-									<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
-										{getSessionPreview({ session })}
-									</p>
+										</div>
+										<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
+											{getSessionPreview({ session })}
+										</p>
+									</button>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-sm"
+										onClick={() => deleteSession({ sessionId: session.id })}
+										title="删除会话"
+										className="absolute right-2 top-2"
+									>
+										<Trash2 className="h-4 w-4" />
+									</Button>
 								</div>
 							);
 						})
