@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
 import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const AgentCreateSchema = z.object({
 	name: z.string().min(1),
@@ -34,7 +35,12 @@ const toAgentPublic = ({ agent }: { agent: AgentPublic }) => ({
 export const Route = createFileRoute("/api/agents/")({
 	server: {
 		handlers: {
-			GET: async () => {
+			GET: async ({ request }) => {
+				const user = await getSessionUser({ request });
+				if (!user) {
+					return jsonResponse({ status: 401, data: { error: "未登录" } });
+				}
+
 				const prisma = getPrisma();
 				const agents = await prisma.agent.findMany({
 					orderBy: { createdAt: "desc" },
@@ -55,6 +61,11 @@ export const Route = createFileRoute("/api/agents/")({
 				});
 			},
 			POST: async ({ request }) => {
+				const user = await getSessionUser({ request });
+				if (!user) {
+					return jsonResponse({ status: 401, data: { error: "未登录" } });
+				}
+
 				const parsed = AgentCreateSchema.safeParse(await request.json());
 				if (!parsed.success) {
 					return jsonResponse({

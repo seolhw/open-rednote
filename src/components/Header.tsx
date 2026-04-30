@@ -16,6 +16,9 @@ export default function Header() {
 						<Link to="/">工作台</Link>
 					</Button>
 					<Button asChild variant="ghost" size="sm">
+						<Link to="/chat">AI 助手</Link>
+					</Button>
+					<Button asChild variant="ghost" size="sm">
 						<Link to="/agents">Agent 管理</Link>
 					</Button>
 					<Button asChild variant="ghost" size="sm">

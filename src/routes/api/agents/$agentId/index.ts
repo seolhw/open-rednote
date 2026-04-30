@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
 import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const AgentUpdateSchema = z
 	.object({
@@ -18,7 +19,12 @@ const AgentUpdateSchema = z
 export const Route = createFileRoute("/api/agents/$agentId/")({
 	server: {
 		handlers: {
-			GET: async ({ params }) => {
+			GET: async ({ request, params }) => {
+				const user = await getSessionUser({ request });
+				if (!user) {
+					return jsonResponse({ status: 401, data: { error: "未登录" } });
+				}
+
 				const prisma = getPrisma();
 				const agent = await prisma.agent.findUnique({
 					where: { id: params.agentId },
@@ -40,6 +46,11 @@ export const Route = createFileRoute("/api/agents/$agentId/")({
 				return jsonResponse({ status: 200, data: agent });
 			},
 			PATCH: async ({ request, params }) => {
+				const user = await getSessionUser({ request });
+				if (!user) {
+					return jsonResponse({ status: 401, data: { error: "未登录" } });
+				}
+
 				const parsed = AgentUpdateSchema.safeParse(await request.json());
 				if (!parsed.success) {
 					return jsonResponse({
@@ -73,7 +84,12 @@ export const Route = createFileRoute("/api/agents/$agentId/")({
 
 				return jsonResponse({ status: 200, data: updated });
 			},
-			DELETE: async ({ params }) => {
+			DELETE: async ({ request, params }) => {
+				const user = await getSessionUser({ request });
+				if (!user) {
+					return jsonResponse({ status: 401, data: { error: "未登录" } });
+				}
+
 				const prisma = getPrisma();
 				const existing = await prisma.agent.findUnique({
 					where: { id: params.agentId },

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -18,6 +18,7 @@ import {
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
+import { authClient } from "#/lib/auth-client";
 
 type AgentItem = {
 	id: string;
@@ -148,6 +149,7 @@ const probeByGatewayRequest = async ({
 	});
 
 function AgentsCardListPage() {
+	const { data: session, isPending } = authClient.useSession();
 	const [items, setItems] = useState<AgentItem[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [createOpen, setCreateOpen] = useState(false);
@@ -307,6 +309,28 @@ function AgentsCardListPage() {
 		setMessage("已删除");
 		await loadAgents();
 	};
+
+	if (isPending) {
+		return <div className="mx-auto w-full max-w-[1160px] px-4 py-10">加载中...</div>;
+	}
+
+	if (!session?.user) {
+		return (
+			<main className="mx-auto w-full max-w-[1160px] px-4 pb-14 pt-8 sm:pt-10">
+				<Card>
+					<CardHeader>
+						<CardTitle>Agent 管理</CardTitle>
+						<CardDescription>你还未登录，请先登录后再管理 Agent。</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Link to="/auth/login" className="text-sm underline">
+							前往登录
+						</Link>
+					</CardContent>
+				</Card>
+			</main>
+		);
+	}
 
 	return (
 		<main className="mx-auto w-full max-w-[1160px] space-y-4 px-4 pb-14 pt-8 sm:pt-10">
