@@ -40,8 +40,8 @@ function InitialLayout({ children }: { children: React.ReactNode }) {
 
 function ChattingLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="border-t border-border/60 bg-background/95 px-4 py-3">
-			<div className="mx-auto w-full max-w-3xl">{children}</div>
+		<div className="border-t border-border/60 bg-background/95 py-3">
+			<div className="mx-auto w-full">{children}</div>
 		</div>
 	);
 }
@@ -281,6 +281,23 @@ function ChatPage() {
 				</div>
 				<ChattingLayout>
 					<div className="space-y-4">
+						<div className="mx-auto flex justify-center flex-wrap gap-2">
+							{[
+								"帮我写一条今天的运营复盘",
+								"给我 5 个爆款选题方向",
+								"把这段文案改成小红书口语风",
+							].map((prompt) => (
+								<Button
+									key={prompt}
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={() => setInput(prompt)}
+								>
+									{prompt}
+								</Button>
+							))}
+						</div>
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
@@ -290,7 +307,7 @@ function ChatPage() {
 								}
 							}}
 						>
-							<div className="relative mx-auto flex max-w-xl items-center gap-2">
+							<div className="relative mx-auto flex max-w-2xl items-center gap-2">
 								<Button
 									type="button"
 									variant={isRecording ? "default" : "outline"}
