@@ -49,7 +49,9 @@ export const Route = createFileRoute("/api/agent-sessions/$sessionId/ws")({
 				url.searchParams.set("session_id", params.sessionId);
 
 				return jsonResponse({
-					data: url.toString(),
+					data: {
+						url: url.toString(),
+					},
 				});
 			},
 		},
