@@ -17,9 +17,15 @@ export const auth = betterAuth({
 	user: {
 		modelName: "User",
 	},
+  session: {
+    modelName: "Session",
+  },
 	account: {
 		modelName: "Account",
 	},
+  jwt: {
+    modelName: "Jwks",
+  },
 	verification: {
 		modelName: "Verification",
 	},
