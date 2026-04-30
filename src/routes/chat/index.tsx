@@ -64,7 +64,7 @@ function Messages({
 			messagesContainerRef.current.scrollTop =
 				messagesContainerRef.current.scrollHeight;
 		}
-	}, []);
+	}, [messages]);
 
 	if (!messages.length) {
 		return null;
@@ -85,7 +85,7 @@ function Messages({
 	return (
 		<div
 			ref={messagesContainerRef}
-			className="min-h-0 flex-1 overflow-y-auto px-2 py-4"
+			className="h-full min-h-0 flex-1 overflow-y-auto px-2 py-4"
 		>
 			<div className="px-12 w-full space-y-3">
 				{messages.map((message) => {
@@ -257,8 +257,8 @@ function ChatPage() {
 	};
 
 	return (
-		<div className="mx-auto mt-6 grid flex-1 w-full max-w-[1280px] grid-cols-[300px_1fr] gap-4">
-			<Card className="overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
+		<div className="mx-auto grid min-h-0 w-full max-w-[1280px] flex-1 grid-cols-[300px_minmax(0,1fr)] gap-4 py-6">
+			<Card className="flex min-h-0 flex-col overflow-hidden border-border/60 bg-muted/30 p-3 shadow-sm">
 				<div className="mb-3 flex items-center justify-between">
 					<p className="text-sm font-semibold">会话</p>
 					<Button
@@ -271,7 +271,7 @@ function ChatPage() {
 						新建
 					</Button>
 				</div>
-				<div className="space-y-2 overflow-y-auto pr-1">
+				<div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
 					{isSessionsLoading ? (
 						<div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -315,7 +315,7 @@ function ChatPage() {
 				</div>
 			</Card>
 
-			<Card className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/60 shadow-sm p-0">
+			<Card className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-border/60 p-0 shadow-sm">
 				<div className="flex-1 min-h-0">
 					{displayMessages.length ? (
 						<Messages
