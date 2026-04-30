@@ -387,6 +387,7 @@ export const ModelName = {
   Agent: 'Agent',
   User: 'User',
   Session: 'Session',
+  Jwks: 'Jwks',
   Account: 'Account',
   Verification: 'Verification',
   AgentSession: 'AgentSession',
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "agent" | "user" | "session" | "account" | "verification" | "agentSession" | "agentMessage"
+    modelProps: "agent" | "user" | "session" | "jwks" | "account" | "verification" | "agentSession" | "agentMessage"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -629,6 +630,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SessionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    Jwks: {
+      payload: Prisma.$JwksPayload<ExtArgs>
+      fields: Prisma.JwksFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.JwksFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.JwksFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        findFirst: {
+          args: Prisma.JwksFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.JwksFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        findMany: {
+          args: Prisma.JwksFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>[]
+        }
+        create: {
+          args: Prisma.JwksCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        createMany: {
+          args: Prisma.JwksCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.JwksCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>[]
+        }
+        delete: {
+          args: Prisma.JwksDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        update: {
+          args: Prisma.JwksUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        deleteMany: {
+          args: Prisma.JwksDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.JwksUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.JwksUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>[]
+        }
+        upsert: {
+          args: Prisma.JwksUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$JwksPayload>
+        }
+        aggregate: {
+          args: Prisma.JwksAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateJwks>
+        }
+        groupBy: {
+          args: Prisma.JwksGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JwksGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.JwksCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.JwksCountAggregateOutputType> | number
         }
       }
     }
@@ -997,16 +1072,27 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const SessionScalarFieldEnum = {
   id: 'id',
-  token: 'token',
   expiresAt: 'expiresAt',
+  token: 'token',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
-  userId: 'userId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  userId: 'userId'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
+
+
+export const JwksScalarFieldEnum = {
+  id: 'id',
+  publicKey: 'publicKey',
+  privateKey: 'privateKey',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type JwksScalarFieldEnum = (typeof JwksScalarFieldEnum)[keyof typeof JwksScalarFieldEnum]
 
 
 export const AccountScalarFieldEnum = {
@@ -1317,6 +1403,7 @@ export type GlobalOmitConfig = {
   agent?: Prisma.AgentOmit
   user?: Prisma.UserOmit
   session?: Prisma.SessionOmit
+  jwks?: Prisma.JwksOmit
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   agentSession?: Prisma.AgentSessionOmit

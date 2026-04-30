@@ -31,26 +31,38 @@ model User {
   image         String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  sessions      Session[]
   accounts      Account[]
   agentSessions AgentSession[]
+
+  sessions Session[]
 
   @@map("users")
 }
 
 model Session {
-  id        String   @id @default(cuid())
-  token     String   @unique
+  id        String   @id
   expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
+  @@unique([token])
   @@index([userId])
-  @@map("sessions")
+  @@map("session")
+}
+
+model Jwks {
+  id         String    @id @default(cuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime  @default(now())
+  expiresAt  DateTime?
+
+  @@map("jwks")
 }
 
 model Account {
@@ -83,6 +95,7 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, value])
+  @@index([identifier])
   @@map("verifications")
 }
 

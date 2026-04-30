@@ -57,6 +57,11 @@ export type User = Prisma.UserModel
  */
 export type Session = Prisma.SessionModel
 /**
+ * Model Jwks
+ * 
+ */
+export type Jwks = Prisma.JwksModel
+/**
  * Model Account
  * 
  */
