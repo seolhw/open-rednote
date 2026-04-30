@@ -1,11 +1,4 @@
-import {
-	abortGatewaySession,
-	getEnabledAgentId,
-	getWsChatUrl,
-} from "./chat";
 import { request } from "./request";
-
-export { abortGatewaySession, getEnabledAgentId, getWsChatUrl };
 
 export type AgentSessionStatus = "active" | "archived";
 export type AgentMessageRole = "system" | "user" | "assistant";
@@ -27,6 +20,21 @@ export interface AgentMessageItem {
 	role: AgentMessageRole;
 	content: string;
 	meta: unknown;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ChatMessage {
+	id: string;
+	role: AgentMessageRole;
+	parts: { type: "text"; content: string }[];
+	createdAt: string;
+}
+
+export interface ChatSession {
+	id: string;
+	title: string;
+	messages: ChatMessage[];
 	createdAt: string;
 	updatedAt: string;
 }
@@ -116,4 +124,20 @@ export const createAgentSessionMessage = async ({
 		url: `/api/agent-sessions/${sessionId}/messages`,
 		method: "POST",
 		body: { role, content, meta },
+	});
+
+export const getWsChatUrl = async ({
+	sessionId,
+}: {
+	sessionId: string;
+}): Promise<string | null> =>
+	request<string>({
+		url: `/api/agent-sessions/${sessionId}/ws`,
+		method: "GET",
+	});
+
+export const getEnabledAgentId = async () =>
+	request<{ id: string } | null>({
+		url: "/api/agents/enabled",
+		method: "GET",
 	});

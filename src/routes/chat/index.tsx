@@ -6,21 +6,21 @@ import {
 	MicOff,
 	Plus,
 	Send,
-	Square,
 	Trash2,
 	Volume2,
 	VolumeX,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
+import type { ChatSession } from "#/api/agent-chat";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
-import type { ChatMessages, ChatSession } from "#/hooks/use-agent-chat-hook";
 import { useAgentChatHook } from "#/hooks/use-agent-chat-hook";
+import type { ChatMessages } from "#/lib/demo-ai-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -167,7 +167,6 @@ function ChatPage() {
 		messages,
 		sendMessage,
 		isLoading,
-		stop,
 		deleteSession,
 	} = useAgentChatHook();
 
@@ -267,14 +266,6 @@ function ChatPage() {
 				</div>
 				<ChattingLayout>
 					<div className="space-y-3">
-						{isLoading ? (
-							<div className="flex items-center justify-center">
-								<Button type="button" variant="destructive" onClick={stop}>
-									<Square className="h-4 w-4 fill-current" />
-									Stop
-								</Button>
-							</div>
-						) : null}
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { env } from "#/env";
-import { auth } from "#/lib/auth";
+import { jsonResponse } from "#/server";
+import { getSessionUser } from "#/server/auth";
 
 const UpdateSchema = z
 	.object({
@@ -12,17 +12,6 @@ const UpdateSchema = z
 	.refine((value) => value.title !== undefined || value.status !== undefined, {
 		message: "至少提供一个可更新字段",
 	});
-
-const jsonResponse = ({ status, data }: { status: number; data: unknown }) =>
-	new Response(JSON.stringify(data), {
-		status,
-		headers: { "Content-Type": "application/json" },
-	});
-
-const getSessionUser = async ({ request }: { request: Request }) => {
-	const session = await auth.api.getSession({ headers: request.headers });
-	return session?.user ?? null;
-};
 
 export const Route = createFileRoute("/api/agent-sessions/$sessionId/")({
 	server: {

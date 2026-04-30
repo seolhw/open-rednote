@@ -4,7 +4,8 @@ import {
 	type AgentMessageItem,
 	type AgentMessageRole,
 	type AgentSessionItem,
-	abortGatewaySession,
+	type ChatMessage,
+	type ChatSession,
 	createAgentSession,
 	createAgentSessionMessage,
 	deleteAgentSession,
@@ -13,11 +14,11 @@ import {
 	listAgentSessionMessages,
 	listAgentSessions,
 } from "#/api/agent-chat";
-import type { ChatMessage, ChatMessages, ChatSession } from "./use-chat-hook";
 
 const toChatMessage = ({ item }: { item: AgentMessageItem }): ChatMessage => ({
 	id: item.id,
 	role: item.role,
+	createdAt: item.createdAt,
 	parts: [{ type: "text", content: item.content }],
 });
 
@@ -26,7 +27,7 @@ const toChatSession = ({
 	messages,
 }: {
 	item: AgentSessionItem;
-	messages: ChatMessages;
+	messages: ChatMessage[];
 }): ChatSession => ({
 	id: item.id,
 	title: item.title,
@@ -88,7 +89,10 @@ export const useAgentChatHook = () => {
 
 	const agentIdQuery = useQuery({
 		queryKey: ["agent-chat", "enabled-agent-id"],
-		queryFn: () => getEnabledAgentId({}),
+		queryFn: async () => {
+			const agent = await getEnabledAgentId();
+			return agent?.id ?? null;
+		},
 		staleTime: 60_000,
 	});
 
@@ -104,9 +108,9 @@ export const useAgentChatHook = () => {
 	});
 
 	const wsUrlQuery = useQuery({
-		queryKey: ["agent-chat", "ws-url", agentIdQuery.data],
-		enabled: Boolean(agentIdQuery.data),
-		queryFn: () => getWsChatUrl({ agentId: agentIdQuery.data as string }),
+		queryKey: ["agent-chat", "ws-url", selectedSessionId],
+		enabled: Boolean(selectedSessionId),
+		queryFn: () => getWsChatUrl({ sessionId: selectedSessionId }),
 		staleTime: 60_000,
 	});
 
@@ -168,16 +172,6 @@ export const useAgentChatHook = () => {
 				queryKey: ["agent-chat", "messages", params.sessionId],
 			});
 		},
-	});
-
-	const abortMutation = useMutation({
-		mutationFn: ({
-			agentId,
-			sessionId,
-		}: {
-			agentId: string;
-			sessionId: string;
-		}) => abortGatewaySession({ agentId, sessionId }),
 	});
 
 	const sessions = useMemo(() => {
@@ -278,26 +272,13 @@ export const useAgentChatHook = () => {
 		);
 	};
 
-	const stop = () => {
-		const agentId = agentIdQuery.data;
-		if (agentId && selectedSessionId) {
-			void abortMutation.mutateAsync({
-				agentId,
-				sessionId: selectedSessionId,
-			});
-		}
-		setIsStreaming(false);
-	};
-
 	const isLoading =
-		isStreaming ||
 		agentIdQuery.isPending ||
 		sessionsQuery.isPending ||
 		messagesQuery.isPending ||
 		createSessionMutation.isPending ||
 		deleteSessionMutation.isPending ||
-		createMessageMutation.isPending ||
-		abortMutation.isPending;
+		createMessageMutation.isPending;
 
 	return {
 		sessions,
@@ -308,7 +289,6 @@ export const useAgentChatHook = () => {
 		messages,
 		sendMessage,
 		isLoading,
-		stop,
 	};
 
 	async function connectSessionViaWs({
@@ -318,13 +298,7 @@ export const useAgentChatHook = () => {
 		sessionId: string;
 		sessionName: string;
 	}): Promise<WebSocket | null> {
-		const wsUrl =
-			wsUrlQuery.data ??
-			(await queryClient.fetchQuery({
-				queryKey: ["agent-chat", "ws-url", agentIdQuery.data],
-				queryFn: () => getWsChatUrl({ agentId: agentIdQuery.data as string }),
-				staleTime: 60_000,
-			}));
+		const wsUrl = wsUrlQuery.data;
 
 		if (!wsUrl) return null;
 
