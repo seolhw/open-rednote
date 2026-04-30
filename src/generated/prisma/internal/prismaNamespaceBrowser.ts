@@ -53,12 +53,11 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Agent: 'Agent',
   User: 'User',
-  Session: 'Session',
-  Jwks: 'Jwks',
   Account: 'Account',
   Verification: 'Verification',
   AgentSession: 'AgentSession',
-  AgentMessage: 'AgentMessage'
+  AgentMessage: 'AgentMessage',
+  Session: 'Session'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -103,31 +102,6 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
-
-
-export const SessionScalarFieldEnum = {
-  id: 'id',
-  expiresAt: 'expiresAt',
-  token: 'token',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  ipAddress: 'ipAddress',
-  userAgent: 'userAgent',
-  userId: 'userId'
-} as const
-
-export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
-
-
-export const JwksScalarFieldEnum = {
-  id: 'id',
-  publicKey: 'publicKey',
-  privateKey: 'privateKey',
-  createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
-} as const
-
-export type JwksScalarFieldEnum = (typeof JwksScalarFieldEnum)[keyof typeof JwksScalarFieldEnum]
 
 
 export const AccountScalarFieldEnum = {
@@ -186,6 +160,20 @@ export const AgentMessageScalarFieldEnum = {
 } as const
 
 export type AgentMessageScalarFieldEnum = (typeof AgentMessageScalarFieldEnum)[keyof typeof AgentMessageScalarFieldEnum]
+
+
+export const SessionScalarFieldEnum = {
+  id: 'id',
+  expiresAt: 'expiresAt',
+  token: 'token',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  userId: 'userId'
+} as const
+
+export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
 
 
 export const SortOrder = {

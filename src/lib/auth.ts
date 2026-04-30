@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { jwt } from "better-auth/plugins/jwt";
+import { bearer } from "better-auth/plugins/bearer";
 import { getPrisma } from "#/db";
 import { env } from "#/env";
 
@@ -23,11 +23,8 @@ export const auth = betterAuth({
 	account: {
 		modelName: "Account",
 	},
-  jwt: {
-    modelName: "Jwks",
-  },
 	verification: {
 		modelName: "Verification",
 	},
-	plugins: [jwt()],
+	plugins: [bearer()],
 });

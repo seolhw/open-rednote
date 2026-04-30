@@ -52,16 +52,6 @@ export type Agent = Prisma.AgentModel
  */
 export type User = Prisma.UserModel
 /**
- * Model Session
- * 
- */
-export type Session = Prisma.SessionModel
-/**
- * Model Jwks
- * 
- */
-export type Jwks = Prisma.JwksModel
-/**
  * Model Account
  * 
  */
@@ -81,3 +71,8 @@ export type AgentSession = Prisma.AgentSessionModel
  * 
  */
 export type AgentMessage = Prisma.AgentMessageModel
+/**
+ * Model Session
+ * 
+ */
+export type Session = Prisma.SessionModel
