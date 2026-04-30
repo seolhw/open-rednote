@@ -1,26 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	Loader2,
-	MessageSquare,
-	Mic,
-	MicOff,
-	Plus,
-	Send,
-	Trash2,
-	Volume2,
-	VolumeX,
-} from "lucide-react";
+import { Loader2, MessageSquare, Plus, Send, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
-import type { ChatSession } from "#/api/agent-chat";
+import type { ChatMessage, ChatSession } from "#/api/agent-chat";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
-import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
-import { useTTS } from "#/hooks/demo-useTTS";
 import { useAgentChatHook } from "#/hooks/use-agent-chat";
-import type { ChatMessages } from "#/lib/demo-ai-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -46,17 +33,7 @@ function ChattingLayout({ children }: { children: React.ReactNode }) {
 	);
 }
 
-function Messages({
-	messages,
-	playingId,
-	onSpeak,
-	onStopSpeak,
-}: {
-	messages: ChatMessages;
-	playingId: string | null;
-	onSpeak: (text: string, id: string) => void;
-	onStopSpeak: () => void;
-}) {
+function Messages({ messages }: { messages: ChatMessage[] }) {
 	const messagesContainerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -70,18 +47,6 @@ function Messages({
 		return null;
 	}
 
-	// Extract text content from message parts
-	const getTextContent = (
-		parts: ChatMessages[number]["parts"],
-	): string | null => {
-		for (const part of parts) {
-			if (part.type === "text" && part.content) {
-				return part.content;
-			}
-		}
-		return null;
-	};
-
 	return (
 		<div
 			ref={messagesContainerRef}
@@ -89,8 +54,6 @@ function Messages({
 		>
 			<div className="px-12 w-full space-y-3">
 				{messages.map((message) => {
-					const textContent = getTextContent(message.parts);
-					const isPlaying = playingId === message.id;
 					const isAssistant = message.role === "assistant";
 
 					return (
@@ -160,24 +123,6 @@ function Messages({
 								})}
 							</div>
 
-							{isAssistant && textContent ? (
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon-sm"
-									onClick={() =>
-										isPlaying ? onStopSpeak() : onSpeak(textContent, message.id)
-									}
-									title={isPlaying ? "Stop speaking" : "Read aloud"}
-								>
-									{isPlaying ? (
-										<VolumeX className="h-4 w-4" />
-									) : (
-										<Volume2 className="h-4 w-4" />
-									)}
-								</Button>
-							) : null}
-
 							{!isAssistant ? (
 								<Badge
 									variant="secondary"
@@ -197,10 +142,6 @@ function Messages({
 function ChatPage() {
 	const [input, setInput] = useState("");
 
-	const { isRecording, isTranscribing, startRecording, stopRecording } =
-		useAudioRecorder();
-	const { playingId, speak, stop: stopTTS } = useTTS();
-
 	const {
 		sessions,
 		selectedSessionId,
@@ -214,19 +155,6 @@ function ChatPage() {
 		isSessionsLoading,
 		deleteSession,
 	} = useAgentChatHook();
-
-	const handleMicClick = async () => {
-		if (isRecording) {
-			const transcribedText = await stopRecording();
-			if (transcribedText) {
-				setInput((prev) =>
-					prev ? `${prev} ${transcribedText}` : transcribedText,
-				);
-			}
-		} else {
-			await startRecording();
-		}
-	};
 
 	const displayMessages = useMemo(() => {
 		if (!streamingAssistantText) return messages;
@@ -318,12 +246,7 @@ function ChatPage() {
 			<Card className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden border-border/60 p-0 shadow-sm">
 				<div className="flex-1 min-h-0">
 					{displayMessages.length ? (
-						<Messages
-							messages={displayMessages}
-							playingId={playingId}
-							onSpeak={speak}
-							onStopSpeak={stopTTS}
-						/>
+						<Messages messages={displayMessages} />
 					) : (
 						<InitialLayout>
 							<p className="text-sm text-muted-foreground">
@@ -364,23 +287,7 @@ function ChatPage() {
 								}
 							}}
 						>
-							<div className="relative mx-auto flex max-w-2xl items-center gap-2">
-								<Button
-									type="button"
-									variant={isRecording ? "default" : "outline"}
-									size="icon"
-									onClick={handleMicClick}
-									disabled={isLoading || isTranscribing}
-									title={isRecording ? "Stop recording" : "Start recording"}
-								>
-									{isTranscribing ? (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									) : isRecording ? (
-										<MicOff className="h-4 w-4" />
-									) : (
-										<Mic className="h-4 w-4" />
-									)}
-								</Button>
+							<div className="relative mx-auto flex max-w-2xl items-center">
 								<div className="relative flex-1">
 									<Textarea
 										value={input}
