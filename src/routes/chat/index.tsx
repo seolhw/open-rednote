@@ -19,7 +19,7 @@ import { Card } from "#/components/ui/card";
 import { Textarea } from "#/components/ui/textarea";
 import { useAudioRecorder } from "#/hooks/demo-useAudioRecorder";
 import { useTTS } from "#/hooks/demo-useTTS";
-import { useAgentChatHook } from "#/hooks/use-agent-chat-hook";
+import { useAgentChatHook } from "#/hooks/use-agent-chat";
 import type { ChatMessages } from "#/lib/demo-ai-hook";
 
 function InitialLayout({ children }: { children: React.ReactNode }) {
