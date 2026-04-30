@@ -10,7 +10,7 @@ import {
 	Volume2,
 	VolumeX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
 import type { ChatSession } from "#/api/agent-chat";
 import { Badge } from "#/components/ui/badge";
@@ -110,18 +110,52 @@ function Messages({
 							<div
 								className={`max-w-[78%] rounded-2xl px-4 py-3 ${isAssistant ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"}`}
 							>
-								{message.parts.map((part) => {
-									if (part.type === "text" && part.content) {
-										return (
-											<div
-												className={`min-w-0 prose max-w-none prose-sm ${isAssistant ? "dark:prose-invert" : "prose-invert"}`}
-												key={`${message.id}-text-${part.content}`}
-											>
-												<Streamdown>{part.content}</Streamdown>
-											</div>
-										);
+								{message.parts.map((part, partIndex) => {
+									if (part.type !== "text" || !part.content) {
+										return null;
 									}
-									return null;
+									return parseMessageBlocks({ text: part.content }).map(
+										(block, blockIndex) => {
+											if (block.type === "think") {
+												return (
+													<details
+														key={`${message.id}`}
+														className="mb-2 rounded-xl border border-dashed border-border/70 bg-background/60 p-2"
+													>
+														<summary className="cursor-pointer text-xs text-muted-foreground">
+															思考中...
+														</summary>
+														<div className="mt-2 min-w-0 prose max-w-none prose-sm dark:prose-invert">
+															<Streamdown>{block.content}</Streamdown>
+														</div>
+													</details>
+												);
+											}
+											if (block.type === "tool_call") {
+												return (
+													<details
+														key={`${message.id}`}
+														className="mb-2 rounded-xl border border-dashed border-emerald-400/60 bg-emerald-50/50 p-2"
+													>
+														<summary className="cursor-pointer text-xs text-emerald-700">
+															工具调用中...
+														</summary>
+														<div className="mt-2 min-w-0 prose max-w-none prose-sm dark:prose-invert">
+															<Streamdown>{block.content}</Streamdown>
+														</div>
+													</details>
+												);
+											}
+											return (
+												<div
+													className={`min-w-0 prose max-w-none prose-sm ${isAssistant ? "dark:prose-invert" : "prose-invert"}`}
+													key={`${message.id}`}
+												>
+													<Streamdown>{block.content}</Streamdown>
+												</div>
+											);
+										},
+									);
 								})}
 							</div>
 
@@ -173,6 +207,8 @@ function ChatPage() {
 		createSession,
 		messages,
 		sendMessage,
+		streamingAssistantText,
+		streamingSessionId,
 		isLoading,
 		isSessionsLoading,
 		deleteSession,
@@ -190,6 +226,21 @@ function ChatPage() {
 			await startRecording();
 		}
 	};
+
+	const displayMessages = useMemo(() => {
+		if (!streamingAssistantText) return messages;
+		if (!selectedSessionId || streamingSessionId !== selectedSessionId)
+			return messages;
+		return [
+			...messages,
+			{
+				id: `streaming-${selectedSessionId}`,
+				role: "assistant" as const,
+				createdAt: new Date().toISOString(),
+				parts: [{ type: "text" as const, content: streamingAssistantText }],
+			},
+		];
+	}, [messages, selectedSessionId, streamingAssistantText, streamingSessionId]);
 
 	const getSessionPreview = ({ session }: { session: ChatSession }) => {
 		const last = session.messages.at(-1);
@@ -264,9 +315,9 @@ function ChatPage() {
 
 			<Card className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/60 shadow-sm p-0">
 				<div className="flex-1 min-h-0">
-					{messages.length ? (
+					{displayMessages.length ? (
 						<Messages
-							messages={messages}
+							messages={displayMessages}
 							playingId={playingId}
 							onSpeak={speak}
 							onStopSpeak={stopTTS}
@@ -372,3 +423,39 @@ function ChatPage() {
 export const Route = createFileRoute("/chat/")({
 	component: ChatPage,
 });
+
+type MessageBlock = {
+	type: "text" | "think" | "tool_call";
+	content: string;
+};
+
+const parseMessageBlocks = ({ text }: { text: string }): MessageBlock[] => {
+	const result: MessageBlock[] = [];
+	const regex = /<(think|tool_call)>([\s\S]*?)<\/\1>/g;
+	let lastIndex = 0;
+	let match = regex.exec(text);
+	while (match) {
+		const start = match.index;
+		const end = regex.lastIndex;
+		if (start > lastIndex) {
+			const normalText = text.slice(lastIndex, start).trim();
+			if (normalText) {
+				result.push({ type: "text", content: normalText });
+			}
+		}
+		const blockType = match[1] === "tool_call" ? "tool_call" : "think";
+		const blockText = (match[2] ?? "").trim();
+		if (blockText) {
+			result.push({ type: blockType, content: blockText });
+		}
+		lastIndex = end;
+		match = regex.exec(text);
+	}
+	if (lastIndex < text.length) {
+		const tail = text.slice(lastIndex).trim();
+		if (tail) {
+			result.push({ type: "text", content: tail });
+		}
+	}
+	return result.length ? result : [{ type: "text", content: text }];
+};

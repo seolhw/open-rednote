@@ -77,10 +77,14 @@ const extractWsFinalText = ({
 	return "";
 };
 
+const hasTaggedBlocks = ({ text }: { text: string }) =>
+	/<think>[\s\S]*?<\/think>|<tool_call>[\s\S]*?<\/tool_call>/.test(text);
+
 export const useAgentChatHook = () => {
 	const queryClient = useQueryClient();
 	const [selectedSessionId, setSelectedSessionId] = useState("");
-	const [isStreaming, setIsStreaming] = useState(false);
+	const [streamingAssistantText, setStreamingAssistantText] = useState("");
+	const [streamingSessionId, setStreamingSessionId] = useState("");
 
 	const wsSocketRef = useRef<WebSocket | null>(null);
 	const activeWsSessionIdRef = useRef("");
@@ -253,11 +257,13 @@ export const useAgentChatHook = () => {
 				role: "assistant",
 				content: "WebSocket 未连接，无法发送消息",
 			});
-			setIsStreaming(false);
+			setStreamingAssistantText("");
+			setStreamingSessionId("");
 			return;
 		}
 
-		setIsStreaming(true);
+		setStreamingAssistantText("");
+		setStreamingSessionId(currentSession.id);
 		pendingSessionIdRef.current = currentSession.id;
 		streamBufferRef.current = "";
 
@@ -289,6 +295,8 @@ export const useAgentChatHook = () => {
 		deleteSession,
 		messages,
 		sendMessage,
+		streamingAssistantText,
+		streamingSessionId,
 		isLoading,
 		isSessionsLoading,
 	};
@@ -334,15 +342,19 @@ export const useAgentChatHook = () => {
 			const textChunk = extractWsTextChunk({ payload });
 			if (textChunk) {
 				streamBufferRef.current = `${streamBufferRef.current}${textChunk}`;
+				setStreamingAssistantText(streamBufferRef.current);
 			}
 
 			const type = typeof payload.type === "string" ? payload.type : "";
 			if (type !== "done" && type !== "message") return;
 
+			const extractedFinalText = extractWsFinalText({ payload });
+			const bufferedText = streamBufferRef.current;
 			const finalText =
-				extractWsFinalText({ payload }) ||
-				streamBufferRef.current ||
-				"Agent 暂无返回内容";
+				hasTaggedBlocks({ text: bufferedText }) &&
+				!hasTaggedBlocks({ text: extractedFinalText })
+					? bufferedText
+					: extractedFinalText || bufferedText || "Agent 暂无返回内容";
 
 			const replySessionId = pendingSessionIdRef.current;
 			if (replySessionId) {
@@ -355,7 +367,8 @@ export const useAgentChatHook = () => {
 
 			pendingSessionIdRef.current = "";
 			streamBufferRef.current = "";
-			setIsStreaming(false);
+			setStreamingAssistantText("");
+			setStreamingSessionId("");
 		};
 
 		socket.onclose = () => {
