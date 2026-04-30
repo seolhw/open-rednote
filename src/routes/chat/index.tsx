@@ -285,7 +285,7 @@ function ChatPage() {
 							{[
 								"帮我写一条今天的运营复盘",
 								"给我 5 个爆款选题方向",
-								"把这段文案改成小红书口语风",
+								"检查小红书登录状态"
 							].map((prompt) => (
 								<Button
 									key={prompt}
