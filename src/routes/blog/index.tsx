@@ -8,11 +8,20 @@ type BlogPost = {
 	title: string;
 	summary: string;
 	readingMinutes: number;
-	category: "内容策略" | "AI 提效" | "运营复盘";
+	category: "技术方案" | "内容策略" | "AI 提效" | "运营复盘";
 	publishedAt: string;
 };
 
 const blogPosts: BlogPost[] = [
+	{
+		id: "4",
+		title: "从 0 到 1：小红书 AI 自动运营平台的技术方案",
+		summary:
+			"完整介绍项目的前后端架构、会话流式链路、Prisma 数据模型、鉴权边界与 Vercel 部署策略。",
+		readingMinutes: 12,
+		category: "技术方案",
+		publishedAt: "2026-04-30",
+	},
 	{
 		id: "1",
 		title: "新手 7 天起号：从 0 到稳定更新",

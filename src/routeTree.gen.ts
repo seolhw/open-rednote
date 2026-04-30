@@ -16,6 +16,7 @@ import { Route as DocsIndexRouteImport } from './routes/docs/index'
 import { Route as ChatIndexRouteImport } from './routes/chat/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as AgentsIndexRouteImport } from './routes/agents/index'
+import { Route as Blog4RouteImport } from './routes/blog/4'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as DocsIdIndexRouteImport } from './routes/docs/$id/index'
@@ -64,6 +65,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const AgentsIndexRoute = AgentsIndexRouteImport.update({
   id: '/agents/',
   path: '/agents/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Blog4Route = Blog4RouteImport.update({
+  id: '/blog/4',
+  path: '/blog/4',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/blog/4': typeof Blog4Route
   '/agents/': typeof AgentsIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
@@ -167,6 +174,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/blog/4': typeof Blog4Route
   '/agents': typeof AgentsIndexRoute
   '/blog': typeof BlogIndexRoute
   '/chat': typeof ChatIndexRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/blog/4': typeof Blog4Route
   '/agents/': typeof AgentsIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/chat/': typeof ChatIndexRoute
@@ -216,6 +225,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/login'
     | '/auth/register'
+    | '/blog/4'
     | '/agents/'
     | '/blog/'
     | '/chat/'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/login'
     | '/auth/register'
+    | '/blog/4'
     | '/agents'
     | '/blog'
     | '/chat'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth/login'
     | '/auth/register'
+    | '/blog/4'
     | '/agents/'
     | '/blog/'
     | '/chat/'
@@ -286,6 +298,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  Blog4Route: typeof Blog4Route
   AgentsIndexRoute: typeof AgentsIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ChatIndexRoute: typeof ChatIndexRoute
@@ -355,6 +368,13 @@ declare module '@tanstack/react-router' {
       path: '/agents'
       fullPath: '/agents/'
       preLoaderRoute: typeof AgentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/4': {
+      id: '/blog/4'
+      path: '/blog/4'
+      fullPath: '/blog/4'
+      preLoaderRoute: typeof Blog4RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
@@ -462,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  Blog4Route: Blog4Route,
   AgentsIndexRoute: AgentsIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ChatIndexRoute: ChatIndexRoute,
