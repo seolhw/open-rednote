@@ -23,59 +23,48 @@ function RouteComponent() {
 				</CardHeader>
 				<CardContent className="space-y-4 text-sm leading-7 text-foreground sm:text-base">
 					<p>
-						这篇文章介绍整个项目的技术落地方案：为什么选择 TanStack Start
-						作为基础框架，如何把 AI 会话、Agent
-						运行时、数据库持久化串成一个稳定闭环，以及如何在 Vercel
-						上完成自动化部署。
+						这次技术方案把中心放在 AI Agent：平台并不是“单次问答页面”，而是把意图理解、任务编排、模型调用、外部工具执行、结果落库串成闭环。
 					</p>
 
-					<h2 className="text-lg font-semibold">1. 技术选型</h2>
+					<h2 className="text-lg font-semibold">1. AI Agent 的职责边界</h2>
 					<p>
-						前端采用 TanStack Start + TanStack Router，数据层使用 TanStack
-						Query，数据库层使用 Prisma + PostgreSQL，鉴权使用 Better
-						Auth。这个组合的核心价值是：类型一致、路由清晰、数据状态可控。
+						Agent 负责三件事：第一，理解用户目标并拆成可执行步骤；第二，根据任务选择模型或 skill；第三，把执行轨迹回传给前端并写入会话记录。这样对话不仅有答案，还有可复盘的执行过程。
 					</p>
 
-					<h2 className="text-lg font-semibold">2. 系统分层</h2>
+					<h2 className="text-lg font-semibold">2. 模型层：文本与图像双引擎</h2>
 					<p>
-						系统分为三层：页面交互层、平台 API
-						层、运行时与数据层。前端页面只调用平台 API，平台 API
-						再去访问数据库与
-						ZeroClaw，避免前端直接依赖外部服务细节，降低耦合与泄漏风险。
+						主文本模型使用 Minimax 2.7，承担策略规划、内容生成、结构化输出。文生图使用 Minimax image-01 与 image-01-live：前者用于高质量封面生成，后者用于更快的交互式预览与迭代。
 					</p>
 
-					<h2 className="text-lg font-semibold">3. 聊天链路</h2>
+					<h2 className="text-lg font-semibold">3. Skill 层：把 Agent 接到真实世界</h2>
 					<p>
-						聊天页由会话列表、消息区、输入区组成。发送消息后，先写入用户消息，再建立
-						WebSocket 通道接收增量响应，流式内容实时渲染，结束后落库为 assistant
-						消息，保证“体验实时 + 数据可追踪”。
+						Skill 是 Agent 的“执行手脚”。在本项目中，重点 skill 是小红书 CLI（xiaohongshu-cli），用于登录态检查、内容读取、互动与发布相关动作。Agent 通过 skill 把“建议”变成“可执行操作”。
+					</p>
+					<p>
+						项目地址：
+						<a
+							href="https://github.com/jackwener/xiaohongshu-cli"
+							target="_blank"
+							rel="noreferrer"
+							className="underline"
+						>
+							jackwener/xiaohongshu-cli
+						</a>
 					</p>
 
-					<h2 className="text-lg font-semibold">4. 数据模型</h2>
+					<h2 className="text-lg font-semibold">4. Agent 与平台连接方式</h2>
 					<p>
-						核心模型是 Agent、AgentSession、AgentMessage。Agent
-						负责运行时连接配置；AgentSession 负责会话生命周期；AgentMessage
-						负责消息明细与元数据。这样可以支持后续审计、复盘、检索与统计。
+						平台层提供统一 API 与会话容器，Agent 运行时通过 WebSocket 建立流式通道。用户消息先进入平台会话，再由 Agent 编排并调用模型/skill，增量结果实时推送到消息区，最终答案与关键执行信息落库。
 					</p>
 
-					<h2 className="text-lg font-semibold">5. 安全边界</h2>
+					<h2 className="text-lg font-semibold">5. 关键数据流</h2>
 					<p>
-						所有敏感 API
-						在服务端统一做会话校验，未登录请求直接拒绝。环境变量通过 zod
-						做类型约束，避免“本地能跑、线上崩溃”。
+						输入：用户目标与上下文。编排：Agent 生成子任务。执行：Minimax 2.7 或 image-01/image-01-live + xiaohongshu-cli。回传：流式文本与工具状态。沉淀：AgentSession 与 AgentMessage。复盘：基于历史会话优化下一轮策略。
 					</p>
 
-					<h2 className="text-lg font-semibold">6. 部署策略</h2>
+					<h2 className="text-lg font-semibold">6. 为什么这个连接方式有效</h2>
 					<p>
-						当前部署到 Vercel，构建流程为：Prisma Generate → Prisma DB Push →
-						Vite Build。这样每次发布可自动同步数据库结构，适合快速迭代阶段。
-					</p>
-
-					<h2 className="text-lg font-semibold">7. 下一步规划</h2>
-					<p>
-						后续会继续完善：消息分页与历史归档、Agent
-						多实例调度、细粒度权限控制，以及从 db push 迁移到 migrate deploy
-						的生产级变更管理。
+						它把“模型能力”和“平台能力”分层：模型负责理解与生成，skill 负责执行与对接，小红书能力通过 CLI 统一封装，平台负责权限、会话与可观测性。这样既保证可扩展，也能快速接入新工具链。
 					</p>
 
 					<div className="pt-2">
