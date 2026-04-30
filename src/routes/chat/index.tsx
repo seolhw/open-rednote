@@ -255,7 +255,7 @@ function ChatPage() {
 				</div>
 			</Card>
 
-			<Card className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/60 shadow-sm">
+			<Card className="flex min-w-0 flex-1 flex-col overflow-hidden border-border/60 shadow-sm p-0">
 				<div className="flex-1 min-h-0">
 					{messages.length ? (
 						<Messages
@@ -273,7 +273,7 @@ function ChatPage() {
 					)}
 				</div>
 				<ChattingLayout>
-					<div className="space-y-3">
+					<div className="space-y-4">
 						<form
 							onSubmit={(e) => {
 								e.preventDefault();
