@@ -87,63 +87,70 @@ function Messages({
 			ref={messagesContainerRef}
 			className="min-h-0 flex-1 overflow-y-auto px-2 py-4"
 		>
-			<div className="mx-auto w-full max-w-3xl space-y-2 px-4">
+			<div className="px-12 w-full space-y-3">
 				{messages.map((message) => {
 					const textContent = getTextContent(message.parts);
 					const isPlaying = playingId === message.id;
+					const isAssistant = message.role === "assistant";
 
 					return (
 						<div
 							key={message.id}
-							className={`rounded-2xl p-4 transition ${
-								message.role === "assistant" ? "bg-muted/60" : "bg-background"
-							}`}
+							className={`flex items-start gap-2 ${isAssistant ? "justify-start" : "justify-end"}`}
 						>
-							<div className="mx-auto flex w-full max-w-3xl items-start gap-4">
+							{isAssistant ? (
 								<Badge
-									variant={
-										message.role === "assistant" ? "default" : "secondary"
-									}
-									className="mt-1 h-8 w-8 justify-center rounded-lg p-0"
+									variant="default"
+									className="h-10 w-10 shrink-0 justify-center rounded-full p-0"
 								>
-									{message.role === "assistant" ? "AI" : "Y"}
+									小红
 								</Badge>
-								<div className="flex-1 min-w-0">
-									{message.parts.map((part) => {
-										if (part.type === "text" && part.content) {
-											return (
-												<div
-													className="flex-1 min-w-0 prose dark:prose-invert max-w-none prose-sm"
-													key={`${message.id}-text-${part.content}`}
-												>
-													<Streamdown>{part.content}</Streamdown>
-												</div>
-											);
-										}
-										return null;
-									})}
-								</div>
-								{/* TTS button for assistant messages */}
-								{message.role === "assistant" && textContent && (
-									<Button
-										type="button"
-										variant="ghost"
-										size="icon-sm"
-										onClick={() =>
-											isPlaying
-												? onStopSpeak()
-												: onSpeak(textContent, message.id)
-										}
-										title={isPlaying ? "Stop speaking" : "Read aloud"}
-									>
-										{isPlaying ? (
-											<VolumeX className="h-4 w-4" />
-										) : (
-											<Volume2 className="h-4 w-4" />
-										)}
-									</Button>
-								)}
+							) : null}
+
+							<div
+								className={`max-w-[78%] rounded-2xl px-4 py-3 ${isAssistant ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"}`}
+							>
+								{message.parts.map((part) => {
+									if (part.type === "text" && part.content) {
+										return (
+											<div
+												className={`min-w-0 prose max-w-none prose-sm ${isAssistant ? "dark:prose-invert" : "prose-invert"}`}
+												key={`${message.id}-text-${part.content}`}
+											>
+												<Streamdown>{part.content}</Streamdown>
+											</div>
+										);
+									}
+									return null;
+								})}
 							</div>
+
+							{isAssistant && textContent ? (
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon-sm"
+									onClick={() =>
+										isPlaying ? onStopSpeak() : onSpeak(textContent, message.id)
+									}
+									title={isPlaying ? "Stop speaking" : "Read aloud"}
+								>
+									{isPlaying ? (
+										<VolumeX className="h-4 w-4" />
+									) : (
+										<Volume2 className="h-4 w-4" />
+									)}
+								</Button>
+							) : null}
+
+							{!isAssistant ? (
+								<Badge
+									variant="secondary"
+									className="h-10 w-10 shrink-0 justify-center rounded-full p-0"
+								>
+									我
+								</Badge>
+							) : null}
 						</div>
 					);
 				})}
