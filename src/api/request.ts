@@ -1,5 +1,11 @@
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+const BEARER_TOKEN_KEY = "bearer_token";
+
+const getBearerToken = () => {
+	return localStorage.getItem(BEARER_TOKEN_KEY) || "";
+};
+
 const parseResponseData = async ({
 	response,
 }: {
@@ -25,12 +31,21 @@ export const request = async <TData>({
 	body?: unknown;
 	signal?: AbortSignal;
 }): Promise<TData | null> => {
+	const token = getBearerToken();
 	const response = await fetch(url, {
 		method,
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			"Content-Type": "application/json",
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		},
 		body: body === undefined ? undefined : JSON.stringify(body),
 		signal,
 	});
+
+	if (response.status === 401 && typeof window !== "undefined") {
+		localStorage.removeItem(BEARER_TOKEN_KEY);
+	}
+
 	const data = (await parseResponseData({ response })) as TData | null;
 	return data;
 };
