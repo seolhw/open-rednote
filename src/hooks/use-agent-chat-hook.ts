@@ -300,7 +300,7 @@ export const useAgentChatHook = () => {
 	}): Promise<WebSocket | null> {
 		const wsUrl = wsUrlQuery.data;
 
-		if (!wsUrl) return null;
+		if (!wsUrl?.url) return null;
 
 		if (
 			activeWsSessionIdRef.current === sessionId &&
@@ -314,7 +314,7 @@ export const useAgentChatHook = () => {
 			wsSocketRef.current = null;
 		}
 
-		const url = new URL(wsUrl);
+		const url = new URL(wsUrl.url);
 		url.searchParams.set("session_id", sessionId);
 		url.searchParams.set("name", sessionName);
 

@@ -130,8 +130,8 @@ export const getWsChatUrl = async ({
 	sessionId,
 }: {
 	sessionId: string;
-}): Promise<string | null> =>
-	request<string>({
+}): Promise<{ url: string } | null> =>
+	request<{ url: string }>({
 		url: `/api/agent-sessions/${sessionId}/ws`,
 		method: "GET",
 	});
