@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { getPrisma } from "#/db";
-import { env } from "#/env";
 import { auth } from "#/lib/auth";
 
 const ListQuerySchema = z.object({
