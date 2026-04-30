@@ -285,14 +285,18 @@ function ChatPage() {
 							{[
 								"帮我写一条今天的运营复盘",
 								"给我 5 个爆款选题方向",
-								"检查小红书登录状态"
+								"检查小红书登录状态",
 							].map((prompt) => (
 								<Button
 									key={prompt}
 									type="button"
 									variant="outline"
 									size="sm"
-									onClick={() => setInput(prompt)}
+									disabled={isLoading}
+									onClick={() => {
+										void sendMessage(prompt);
+										setInput("");
+									}}
 								>
 									{prompt}
 								</Button>
