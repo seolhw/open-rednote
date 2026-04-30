@@ -80,6 +80,26 @@ const extractWsFinalText = ({
 const hasTaggedBlocks = ({ text }: { text: string }) =>
 	/<think>[\s\S]*?<\/think>|<tool_call>[\s\S]*?<\/tool_call>/.test(text);
 
+const extractWsErrorText = ({
+	payload,
+}: {
+	payload: Record<string, unknown>;
+}) => {
+	const message = payload.message;
+	const error = payload.error;
+	const code = payload.code;
+	if (typeof message === "string" && message.trim()) {
+		if (typeof code === "string" && code.trim()) {
+			return `[${code}] ${message}`;
+		}
+		return message;
+	}
+	if (typeof error === "string" && error.trim()) return error;
+	if (typeof code === "string" && code.trim())
+		return `[${code}] Agent 执行失败`;
+	return "Agent 执行失败，请稍后重试";
+};
+
 export const useAgentChatHook = () => {
 	const queryClient = useQueryClient();
 	const [selectedSessionId, setSelectedSessionId] = useState("");
@@ -346,6 +366,21 @@ export const useAgentChatHook = () => {
 			}
 
 			const type = typeof payload.type === "string" ? payload.type : "";
+			if (type === "error") {
+				const replySessionId = pendingSessionIdRef.current;
+				if (replySessionId) {
+					await createMessageMutation.mutateAsync({
+						sessionId: replySessionId,
+						role: "assistant",
+						content: `❌ ${extractWsErrorText({ payload })}`,
+					});
+				}
+				pendingSessionIdRef.current = "";
+				streamBufferRef.current = "";
+				setStreamingAssistantText("");
+				setStreamingSessionId("");
+				return;
+			}
 			if (type !== "done" && type !== "message") return;
 
 			const extractedFinalText = extractWsFinalText({ payload });
