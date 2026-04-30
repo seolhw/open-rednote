@@ -272,6 +272,7 @@ export const useAgentChatHook = () => {
 		);
 	};
 
+	const isSessionsLoading = agentIdQuery.isPending || sessionsQuery.isPending;
 	const isLoading =
 		agentIdQuery.isPending ||
 		sessionsQuery.isPending ||
@@ -289,6 +290,7 @@ export const useAgentChatHook = () => {
 		messages,
 		sendMessage,
 		isLoading,
+		isSessionsLoading,
 	};
 
 	async function connectSessionViaWs({

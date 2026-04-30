@@ -167,6 +167,7 @@ function ChatPage() {
 		messages,
 		sendMessage,
 		isLoading,
+		isSessionsLoading,
 		deleteSession,
 	} = useAgentChatHook();
 
@@ -212,38 +213,45 @@ function ChatPage() {
 					</Button>
 				</div>
 				<div className="space-y-2 overflow-y-auto pr-1">
-					{sessions.map((session) => {
-						const selected = session.id === selectedSessionId;
-						return (
-							<div
-								key={session.id}
-								className={`w-full rounded-xl border p-3 transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
-							>
-								<div className="mb-1 flex items-start justify-between gap-2">
-									<button
-										type="button"
-										onClick={() => selectSession({ sessionId: session.id })}
-										className="flex min-w-0 items-center gap-2 text-left text-sm font-semibold text-zinc-700"
-									>
-										<MessageSquare className="h-4 w-4 shrink-0 text-zinc-500" />
-										<span className="truncate">{session.title}</span>
-									</button>
-									<Button
-										type="button"
-										variant="ghost"
-										size="icon-sm"
-										onClick={() => deleteSession({ sessionId: session.id })}
-										title="删除会话"
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
+					{isSessionsLoading ? (
+						<div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							加载会话中...
+						</div>
+					) : (
+						sessions.map((session) => {
+							const selected = session.id === selectedSessionId;
+							return (
+								<div
+									key={session.id}
+									className={`w-full rounded-xl border p-3 transition ${selected ? "border-border bg-background shadow-sm" : "border-transparent bg-transparent hover:bg-accent"}`}
+								>
+									<div className="mb-1 flex items-start justify-between gap-2">
+										<button
+											type="button"
+											onClick={() => selectSession({ sessionId: session.id })}
+											className="flex min-w-0 items-center gap-2 text-left text-sm font-semibold text-zinc-700"
+										>
+											<MessageSquare className="h-4 w-4 shrink-0 text-zinc-500" />
+											<span className="truncate">{session.title}</span>
+										</button>
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon-sm"
+											onClick={() => deleteSession({ sessionId: session.id })}
+											title="删除会话"
+										>
+											<Trash2 className="h-4 w-4" />
+										</Button>
+									</div>
+									<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
+										{getSessionPreview({ session })}
+									</p>
 								</div>
-								<p className="line-clamp-2 text-xs leading-5 text-muted-foreground">
-									{getSessionPreview({ session })}
-								</p>
-							</div>
-						);
-					})}
+							);
+						})
+					)}
 				</div>
 			</Card>
 
