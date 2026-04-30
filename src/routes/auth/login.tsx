@@ -99,6 +99,10 @@ function LoginPage() {
 						</div>
 					) : null}
 
+					<div className="bg-red-50 p-2 text-sm">
+						可直接使用 test@qq.com 12345678 登录
+					</div>
+
 					<button
 						type="submit"
 						disabled={submitting}
