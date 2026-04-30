@@ -1,5 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import type {
+	AgentItem,
+	CreateAgentPayload,
+	UpdateAgentPayload,
+} from "#/api/agent";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -18,228 +23,47 @@ import {
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Textarea } from "#/components/ui/textarea";
+import { useAgentAdminHook } from "#/hooks/use-agent";
 import { authClient } from "#/lib/auth-client";
 
-type AgentItem = {
-	id: string;
-	name: string;
-	baseUrl: string;
-	description: string | null;
-	isEnabled: boolean;
-	createdAt: string;
-	updatedAt: string;
+const emptyCreateForm: CreateAgentPayload = {
+	name: "",
+	baseUrl: "",
+	token: "",
+	description: "",
+	isEnabled: true,
 };
 
-type AgentListResponse = {
-	items: AgentItem[];
-};
-
-type GatewayProbeResponse = {
-	ok: boolean;
-	status: number;
-	contentType: string;
-	targetUrl: string;
-	endpoint: {
-		key: string;
-		path: string;
-		method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-	};
-	ws: {
-		chatPath: string;
-		chatUrl: string;
-	};
-	data: unknown;
-};
-
-type RequestResult = {
-	ok: boolean;
-	status: number;
-	data: unknown;
-};
-
-const emptyCreateForm = {
+const emptyEditForm: UpdateAgentPayload = {
 	name: "",
 	baseUrl: "",
 	token: "",
 	description: "",
 };
-
-const emptyEditForm = {
-	name: "",
-	baseUrl: "",
-	token: "",
-	description: "",
-};
-
-const parseResponseData = async ({
-	response,
-}: {
-	response: Response;
-}): Promise<unknown> => {
-	const contentType = response.headers.get("content-type") ?? "";
-	const raw = await response.text();
-
-	if (raw.length === 0) {
-		return null;
-	}
-
-	if (contentType.includes("application/json")) {
-		return JSON.parse(raw);
-	}
-
-	return raw;
-};
-
-const requestJson = async ({
-	url,
-	method = "GET",
-	body,
-}: {
-	url: string;
-	method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-	body?: unknown;
-}): Promise<RequestResult> => {
-	const settled = await Promise.allSettled([
-		fetch(url, {
-			method,
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: body === undefined ? undefined : JSON.stringify(body),
-		}),
-	]);
-
-	const item = settled[0];
-	if (item.status === "rejected") {
-		return {
-			ok: false,
-			status: 0,
-			data: {
-				error: "请求失败",
-				details:
-					item.reason instanceof Error ? item.reason.message : "unknown error",
-			},
-		};
-	}
-
-	const data = await parseResponseData({ response: item.value });
-	return {
-		ok: item.value.ok,
-		status: item.value.status,
-		data,
-	};
-};
-
-type AgentCardStatus = { ok: boolean; text: string; updatedAt: number };
-
-const probeByGatewayRequest = async ({
-	agentId,
-	path,
-}: {
-	agentId: string;
-	path: string;
-}): Promise<RequestResult> =>
-	requestJson({
-		url: `/api/agents/${agentId}/gateway/request`,
-		method: "POST",
-		body: {
-			method: "GET",
-			path,
-		},
-	});
 
 function AgentsCardListPage() {
 	const { data: session, isPending } = authClient.useSession();
-	const [items, setItems] = useState<AgentItem[]>([]);
-	const [loading, setLoading] = useState(false);
 	const [createOpen, setCreateOpen] = useState(false);
 	const [editOpen, setEditOpen] = useState(false);
 	const [editingId, setEditingId] = useState<string | null>(null);
-	const [isRefreshingStatus, setIsRefreshingStatus] = useState(false);
 	const [message, setMessage] = useState("");
 	const [createForm, setCreateForm] = useState(emptyCreateForm);
 	const [editForm, setEditForm] = useState(emptyEditForm);
-	const [statusById, setStatusById] = useState<Record<string, AgentCardStatus>>(
-		{},
-	);
 
-	const loadAgents = useCallback(async () => {
-		setLoading(true);
-		const result = await requestJson({ url: "/api/agents" });
-		if (!result.ok) {
-			setLoading(false);
-			setMessage("加载 Agent 列表失败");
-			return;
-		}
-		const payload = result.data as AgentListResponse;
-		setItems(payload.items ?? []);
-		setLoading(false);
-	}, []);
-
-	const refreshOneStatus = useCallback(async ({ id }: { id: string }) => {
-		const [healthResult, apiHealthResult] = await Promise.all([
-			probeByGatewayRequest({ agentId: id, path: "/health" }),
-			probeByGatewayRequest({ agentId: id, path: "/api/health" }),
-		]);
-
-		if (!healthResult.ok || !apiHealthResult.ok) {
-			setStatusById((p) => ({
-				...p,
-				[id]: {
-					ok: false,
-					text: `探测失败(health:${healthResult.status}, api:${apiHealthResult.status})`,
-					updatedAt: Date.now(),
-				},
-			}));
-			return;
-		}
-
-		const healthPayload = healthResult.data as GatewayProbeResponse;
-		const apiHealthPayload = apiHealthResult.data as GatewayProbeResponse;
-		const ok = healthPayload.ok && apiHealthPayload.ok;
-		const text = `health ${healthPayload.status} / api ${apiHealthPayload.status}`;
-		setStatusById((p) => ({ ...p, [id]: { ok, text, updatedAt: Date.now() } }));
-	}, []);
-
-	const refreshAllStatus = useCallback(
-		async ({ agents }: { agents: AgentItem[] }) => {
-			setIsRefreshingStatus(true);
-			await Promise.all(
-				agents.map((agent) => refreshOneStatus({ id: agent.id })),
-			);
-			setIsRefreshingStatus(false);
-		},
-		[refreshOneStatus],
-	);
-
-	useEffect(() => {
-		void loadAgents();
-	}, [loadAgents]);
-	useEffect(() => {
-		if (items.length) void refreshAllStatus({ agents: items });
-	}, [items, refreshAllStatus]);
-
-	const handleCreate = async () => {
-		const result = await requestJson({
-			url: "/api/agents",
-			method: "POST",
-			body: {
-				name: createForm.name.trim(),
-				baseUrl: createForm.baseUrl.trim(),
-				token: createForm.token.trim(),
-				description: createForm.description.trim() || undefined,
-				isEnabled: true,
-			},
-		});
-		if (!result.ok) {
-			setMessage("创建 Agent 失败");
-			return;
-		}
-		setCreateForm(emptyCreateForm);
-		setCreateOpen(false);
-		setMessage("创建成功");
-		await loadAgents();
-	};
+	const {
+		items,
+		isAgentsLoading,
+		statusById,
+		isRefreshingStatus,
+		refreshAllStatus,
+		createAgentAction,
+		updateAgentAction,
+		deleteAgentAction,
+		createErrorMessage,
+		updateErrorMessage,
+		deleteErrorMessage,
+		isSaving,
+	} = useAgentAdminHook();
 
 	const handleOpenEdit = ({ agent }: { agent: AgentItem }) => {
 		setEditingId(agent.id);
@@ -252,29 +76,44 @@ function AgentsCardListPage() {
 		setEditOpen(true);
 	};
 
-	const handleSaveEdit = async () => {
-		if (!editingId) {
-			return;
-		}
-		const result = await requestJson({
-			url: `/api/agents/${editingId}`,
-			method: "PATCH",
-			body: {
-				name: editForm.name.trim(),
-				baseUrl: editForm.baseUrl.trim(),
-				token: editForm.token.trim() || undefined,
-				description: editForm.description.trim() || null,
+	const handleCreate = async () => {
+		const ok = await createAgentAction({
+			payload: {
+				name: createForm.name.trim(),
+				baseUrl: createForm.baseUrl.trim(),
+				token: createForm.token.trim(),
+				description: createForm.description?.trim(),
+				isEnabled: true,
 			},
 		});
-		if (!result.ok) {
-			setMessage("保存修改失败");
+		if (!ok) {
+			setMessage(createErrorMessage || "创建 Agent 失败");
+			return;
+		}
+		setCreateForm(emptyCreateForm);
+		setCreateOpen(false);
+		setMessage("创建成功");
+	};
+
+	const handleSaveEdit = async () => {
+		if (!editingId) return;
+		const ok = await updateAgentAction({
+			agentId: editingId,
+			payload: {
+				name: editForm.name?.trim(),
+				baseUrl: editForm.baseUrl?.trim(),
+				token: editForm.token?.trim() || undefined,
+				description: editForm.description?.trim() || null,
+			},
+		});
+		if (!ok) {
+			setMessage(updateErrorMessage || "保存修改失败");
 			return;
 		}
 		setMessage("保存成功");
 		setEditOpen(false);
 		setEditingId(null);
 		setEditForm(emptyEditForm);
-		await loadAgents();
 	};
 
 	const handleToggleEnabled = async ({
@@ -284,34 +123,30 @@ function AgentsCardListPage() {
 		id: string;
 		nextEnabled: boolean;
 	}) => {
-		const result = await requestJson({
-			url: `/api/agents/${id}`,
-			method: "PATCH",
-			body: { isEnabled: nextEnabled },
+		const ok = await updateAgentAction({
+			agentId: id,
+			payload: { isEnabled: nextEnabled },
 		});
-		if (!result.ok) {
-			setMessage("更新启用状态失败");
+		if (!ok) {
+			setMessage(updateErrorMessage || "更新启用状态失败");
 			return;
 		}
 		setMessage("状态已更新");
-		await loadAgents();
 	};
 
 	const handleDelete = async ({ id }: { id: string }) => {
-		const result = await requestJson({
-			url: `/api/agents/${id}`,
-			method: "DELETE",
-		});
-		if (!result.ok) {
-			setMessage("删除失败");
+		const ok = await deleteAgentAction({ agentId: id });
+		if (!ok) {
+			setMessage(deleteErrorMessage || "删除失败");
 			return;
 		}
 		setMessage("已删除");
-		await loadAgents();
 	};
 
 	if (isPending) {
-		return <div className="mx-auto w-full max-w-[1160px] px-4 py-10">加载中...</div>;
+		return (
+			<div className="mx-auto w-full max-w-[1160px] px-4 py-10">加载中...</div>
+		);
 	}
 
 	if (!session?.user) {
@@ -320,7 +155,9 @@ function AgentsCardListPage() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Agent 管理</CardTitle>
-						<CardDescription>你还未登录，请先登录后再管理 Agent。</CardDescription>
+						<CardDescription>
+							你还未登录，请先登录后再管理 Agent。
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Link to="/auth/login" className="text-sm underline">
@@ -346,7 +183,7 @@ function AgentsCardListPage() {
 						<Button
 							variant="outline"
 							onClick={() => refreshAllStatus({ agents: items })}
-							disabled={loading || isRefreshingStatus}
+							disabled={isAgentsLoading || isRefreshingStatus || isSaving}
 						>
 							{isRefreshingStatus ? "刷新中..." : "刷新状态"}
 						</Button>
@@ -403,7 +240,7 @@ function AgentsCardListPage() {
 						</CardContent>
 					</Card>
 				))}
-				{!items.length && !loading ? (
+				{!items.length && !isAgentsLoading ? (
 					<Card>
 						<CardContent className="py-6 text-sm text-muted-foreground">
 							暂无 Agent，请点击上方创建。
@@ -456,7 +293,9 @@ function AgentsCardListPage() {
 							<Button variant="outline" onClick={() => setCreateOpen(false)}>
 								取消
 							</Button>
-							<Button onClick={handleCreate}>创建</Button>
+							<Button onClick={handleCreate} disabled={isSaving}>
+								创建
+							</Button>
 						</div>
 					</div>
 				</DialogContent>
@@ -479,7 +318,7 @@ function AgentsCardListPage() {
 						<Label htmlFor="editName">名称</Label>
 						<Input
 							id="editName"
-							value={editForm.name}
+							value={editForm.name ?? ""}
 							onChange={(e) =>
 								setEditForm((p) => ({ ...p, name: e.target.value }))
 							}
@@ -487,7 +326,7 @@ function AgentsCardListPage() {
 						<Label htmlFor="editBaseUrl">Gateway Base URL</Label>
 						<Input
 							id="editBaseUrl"
-							value={editForm.baseUrl}
+							value={editForm.baseUrl ?? ""}
 							onChange={(e) =>
 								setEditForm((p) => ({ ...p, baseUrl: e.target.value }))
 							}
@@ -497,7 +336,7 @@ function AgentsCardListPage() {
 							id="editToken"
 							type="password"
 							placeholder="留空则不修改"
-							value={editForm.token}
+							value={editForm.token ?? ""}
 							onChange={(e) =>
 								setEditForm((p) => ({ ...p, token: e.target.value }))
 							}
@@ -506,7 +345,7 @@ function AgentsCardListPage() {
 						<Textarea
 							id="editDescription"
 							rows={3}
-							value={editForm.description}
+							value={editForm.description ?? ""}
 							onChange={(e) =>
 								setEditForm((p) => ({ ...p, description: e.target.value }))
 							}
@@ -515,7 +354,9 @@ function AgentsCardListPage() {
 							<Button variant="outline" onClick={() => setEditOpen(false)}>
 								取消
 							</Button>
-							<Button onClick={handleSaveEdit}>保存</Button>
+							<Button onClick={handleSaveEdit} disabled={isSaving}>
+								保存
+							</Button>
 						</div>
 					</div>
 				</DialogContent>
